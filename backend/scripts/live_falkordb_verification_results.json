@@ -1,0 +1,146 @@
+{
+  "falkordb_connected": true,
+  "step_1_create_isolated_graph": true,
+  "step_2_index_real_repo": {
+    "stats": {
+      "files_scanned": 8,
+      "symbols_extracted": 11,
+      "relationships_created": 25,
+      "files_skipped": 0,
+      "parsing_errors": 0,
+      "duration_seconds": 0.05
+    },
+    "latency_ms": 51.51
+  },
+  "step_3_relationships_persisted": {
+    "nodes": [
+      [
+        "Test",
+        1
+      ],
+      [
+        "File",
+        8
+      ],
+      [
+        "Variable",
+        1
+      ],
+      [
+        "Concept",
+        9
+      ],
+      [
+        "Repository",
+        2
+      ],
+      [
+        "Function",
+        6
+      ],
+      [
+        "Module",
+        3
+      ],
+      [
+        "State",
+        1
+      ],
+      [
+        "Config",
+        2
+      ],
+      [
+        "Endpoint",
+        1
+      ]
+    ],
+    "relationships": [
+      [
+        "TESTS",
+        1
+      ],
+      [
+        "READS_STATE",
+        1
+      ],
+      [
+        "IMPORTS",
+        7
+      ],
+      [
+        "DEFINES",
+        11
+      ],
+      [
+        "CALLS",
+        14
+      ],
+      [
+        "DEPENDS_ON",
+        1
+      ],
+      [
+        "CONTAINS",
+        8
+      ]
+    ]
+  },
+  "step_4_queried_relationships": [
+    [
+      "Repository",
+      "sample-repo",
+      "CONTAINS",
+      "test_utils.py"
+    ],
+    [
+      "Repository",
+      "sample-repo",
+      "CONTAINS",
+      "utils.py"
+    ],
+    [
+      "Repository",
+      "sample-repo",
+      "CONTAINS",
+      "db.py"
+    ],
+    [
+      "Repository",
+      "sample-repo",
+      "CONTAINS",
+      "config.py"
+    ],
+    [
+      "Repository",
+      "sample-repo",
+      "CONTAINS",
+      "schema.sql"
+    ]
+  ],
+  "step_5_investigation_saved": true,
+  "step_6_backend_restarted": true,
+  "step_7_investigation_retrieved": {
+    "objective": "Analyze failure mode of database connection pool under network partition",
+    "task_count": 1
+  },
+  "step_8_continued_by_agent_2": true,
+  "step_9_repository_isolation_verified": true,
+  "step_10_causal_decisions_verified": {
+    "exp_a": {
+      "action": "SELECT_AND_RUN_TESTS",
+      "algo": "reverse_dependencies",
+      "factor": "Graph shows component is on critical path with 3 inbound caller(s): poll_once, run_worker_once, audit_job."
+    },
+    "exp_b": {
+      "action": "NO_ACTION_REQUIRED",
+      "algo": "shortest_path",
+      "factor": "Graph contains verified protective circuit breaker covering downstream failure paths."
+    },
+    "exp_c": {
+      "action": "BLAST_RADIUS_AUDIT",
+      "algo": "reverse_dependencies",
+      "factor": "Circuit breaker exists in graph but does NOT cover critical dependency 'unshielded_payment_sink'; failure containment is unverified."
+    }
+  }
+}

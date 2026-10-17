@@ -1,0 +1,8 @@
+{
+  "persistence_verified": true,
+  "concurrency_tested_threads": 5,
+  "single_winner_enforced": true,
+  "lease_recovery_succeeded": true,
+  "provenance_retained": true,
+  "contradiction_rejection": "REJECTED_NEEDS_REVISION"
+}

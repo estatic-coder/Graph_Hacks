@@ -1,0 +1,7 @@
+{
+  "services": {
+    "orbitops.worker": {"team": "Reliability Engineering", "lead": "Maya Rao"},
+    "orbitops.consumer": {"team": "Core Infrastructure", "lead": "Noah Iyer"},
+    "orbitops.review": {"team": "Reliability Engineering", "lead": "Maya Rao"}
+  }
+}

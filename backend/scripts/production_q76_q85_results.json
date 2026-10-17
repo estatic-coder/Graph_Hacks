@@ -1,0 +1,352 @@
+{
+  "benchmark": "ASTERION_Q76_Q85_REGRESSION_PROTECTION",
+  "timestamp": "2026-10-14 02:48:17",
+  "q76_q78_individual": [
+    {
+      "label": "Q76",
+      "question": "Find the direct and indirect impact paths from ledger to gateway.",
+      "status_code": 200,
+      "passed": true,
+      "is_verified": true,
+      "selected_capabilities": [
+        "STATIC_PATH_ANALYSIS"
+      ],
+      "executed_tools": [
+        "STATIC_PATH_ANALYSIS"
+      ],
+      "citations_valid": 1,
+      "paths_valid": 2,
+      "missing_fields": [],
+      "verification_summary": "VERIFIED: 1 citation(s) and 2 path(s) grounded in repository facts; contract satisfied.",
+      "latency_s": 0.178,
+      "answer_length": 1219,
+      "trace_stages": [
+        "api_payload",
+        "repository_selection",
+        "intent_classification",
+        "entity_resolution",
+        "plan_generation",
+        "tool_execution",
+        "tool_output_normalization",
+        "evidence_retrieval",
+        "answer_synthesis",
+        "verification",
+        "api_response"
+      ]
+    },
+    {
+      "label": "Q77",
+      "question": "Simulate a staging auth v2.0 rollout with three failed health probes.",
+      "status_code": 200,
+      "passed": true,
+      "is_verified": true,
+      "selected_capabilities": [
+        "MULTIPHASE_SCENARIO"
+      ],
+      "executed_tools": [
+        "MULTIPHASE_SCENARIO"
+      ],
+      "citations_valid": 17,
+      "paths_valid": 0,
+      "missing_fields": [],
+      "verification_summary": "VERIFIED: 17 citation(s) and 0 path(s) grounded in repository facts; contract satisfied.",
+      "latency_s": 0.167,
+      "answer_length": 2359,
+      "trace_stages": [
+        "api_payload",
+        "repository_selection",
+        "intent_classification",
+        "entity_resolution",
+        "plan_generation",
+        "tool_execution",
+        "tool_output_normalization",
+        "evidence_retrieval",
+        "answer_synthesis",
+        "verification",
+        "api_response"
+      ]
+    },
+    {
+      "label": "Q78",
+      "question": "Simulate staging gateway submission with ledger missing.",
+      "status_code": 200,
+      "passed": true,
+      "is_verified": true,
+      "selected_capabilities": [
+        "BRANCH_ANALYSIS"
+      ],
+      "executed_tools": [
+        "BRANCH_ANALYSIS"
+      ],
+      "citations_valid": 14,
+      "paths_valid": 0,
+      "missing_fields": [],
+      "verification_summary": "VERIFIED: 14 citation(s) and 0 path(s) grounded in repository facts; contract satisfied.",
+      "latency_s": 0.185,
+      "answer_length": 2049,
+      "trace_stages": [
+        "api_payload",
+        "repository_selection",
+        "intent_classification",
+        "entity_resolution",
+        "plan_generation",
+        "tool_execution",
+        "tool_output_normalization",
+        "evidence_retrieval",
+        "answer_synthesis",
+        "verification",
+        "api_response"
+      ]
+    }
+  ],
+  "q79_q85_individual": [
+    {
+      "label": "Q79",
+      "question": "Starting with the default DeployWeave state, submit a staging auth v2.0 rollout, let it fail all health probes and roll back, then submit a new staging auth v3.0 rollout that succeeds. Calculate the final SLOTS, LOCKED, VERSIONS, READY, CHECKS, CHANGES, EVENTS and AUDIT. Distinguish state scoped per rollout from state shared across rollouts.",
+      "status_code": 200,
+      "passed": true,
+      "is_verified": true,
+      "selected_capabilities": [
+        "MULTIPHASE_SCENARIO"
+      ],
+      "executed_tools": [
+        "MULTIPHASE_SCENARIO"
+      ],
+      "citations_valid": 15,
+      "paths_valid": 0,
+      "missing_fields": [],
+      "verification_summary": "VERIFIED: 15 citation(s) and 0 path(s) grounded in repository facts; contract satisfied.",
+      "latency_s": 0.805,
+      "answer_length": 2324,
+      "trace_stages": [
+        "api_payload",
+        "repository_selection",
+        "intent_classification",
+        "entity_resolution",
+        "plan_generation",
+        "tool_execution",
+        "tool_output_normalization",
+        "evidence_retrieval",
+        "answer_synthesis",
+        "verification",
+        "api_response"
+      ]
+    },
+    {
+      "label": "Q80",
+      "question": "Two staging auth rollouts, r1 and r2, are submitted sequentially when SLOTS['auth'] is initially 2. Both are queued. r1 succeeds, but r2 fails all health probes. Trace execution in FIFO order and calculate the final available slots, version, lock state, audit history and registry changes. Explain why r2's rollback target matters.",
+      "status_code": 200,
+      "passed": true,
+      "is_verified": true,
+      "selected_capabilities": [
+        "MULTIPHASE_SCENARIO"
+      ],
+      "executed_tools": [
+        "MULTIPHASE_SCENARIO"
+      ],
+      "citations_valid": 9,
+      "paths_valid": 0,
+      "missing_fields": [],
+      "verification_summary": "VERIFIED: 9 citation(s) and 0 path(s) grounded in repository facts; contract satisfied.",
+      "latency_s": 0.279,
+      "answer_length": 2144,
+      "trace_stages": [
+        "api_payload",
+        "repository_selection",
+        "intent_classification",
+        "entity_resolution",
+        "plan_generation",
+        "tool_execution",
+        "tool_output_normalization",
+        "evidence_retrieval",
+        "answer_synthesis",
+        "verification",
+        "api_response"
+      ]
+    },
+    {
+      "label": "Q81",
+      "question": "Suppose a production gateway rollout is submitted while the ledger version is absent. Later the ledger version is restored, but gateway remains blocked. Does calling approve_rollout() now work? Derive the answer from the persisted status and approval guard. Identify the minimum workflow change needed for recovery.",
+      "status_code": 200,
+      "passed": true,
+      "is_verified": true,
+      "selected_capabilities": [
+        "BRANCH_ANALYSIS"
+      ],
+      "executed_tools": [
+        "BRANCH_ANALYSIS"
+      ],
+      "citations_valid": 4,
+      "paths_valid": 0,
+      "missing_fields": [],
+      "verification_summary": "VERIFIED: 4 citation(s) and 0 path(s) grounded in repository facts; contract satisfied.",
+      "latency_s": 0.241,
+      "answer_length": 1449,
+      "trace_stages": [
+        "api_payload",
+        "repository_selection",
+        "intent_classification",
+        "entity_resolution",
+        "plan_generation",
+        "tool_execution",
+        "tool_output_normalization",
+        "evidence_retrieval",
+        "answer_synthesis",
+        "verification",
+        "api_response"
+      ]
+    },
+    {
+      "label": "Q82",
+      "question": "Suppose execute(r) installs version 2.0, the first probe fails, and the second succeeds. Compare the intermediate version, number of installations, final attempts, registry changes and final slot balance. Does each probe retry repeat installation?",
+      "status_code": 200,
+      "passed": true,
+      "is_verified": true,
+      "selected_capabilities": [
+        "LOOP_EXECUTION_ANALYSIS"
+      ],
+      "executed_tools": [
+        "LOOP_EXECUTION_ANALYSIS"
+      ],
+      "citations_valid": 8,
+      "paths_valid": 0,
+      "missing_fields": [],
+      "verification_summary": "VERIFIED: 8 citation(s) and 0 path(s) grounded in repository facts; contract satisfied.",
+      "latency_s": 0.215,
+      "answer_length": 1515,
+      "trace_stages": [
+        "api_payload",
+        "repository_selection",
+        "intent_classification",
+        "entity_resolution",
+        "plan_generation",
+        "tool_execution",
+        "tool_output_normalization",
+        "evidence_retrieval",
+        "answer_synthesis",
+        "verification",
+        "api_response"
+      ]
+    },
+    {
+      "label": "Q83",
+      "question": "A failed rollout has ROLLBACK_COUNTS[k] = 1 and MAX_ROLLBACKS = 1. An operator manually restores capacity and calls retry_rollout(k). Can capacity availability override the retry limit? Show the first guard that stops execution.",
+      "status_code": 200,
+      "passed": true,
+      "is_verified": true,
+      "selected_capabilities": [
+        "STATIC_PATH_ANALYSIS"
+      ],
+      "executed_tools": [
+        "STATIC_PATH_ANALYSIS"
+      ],
+      "citations_valid": 1,
+      "paths_valid": 0,
+      "missing_fields": [],
+      "verification_summary": "VERIFIED: 1 citation(s) and 0 path(s) grounded in repository facts; contract satisfied.",
+      "latency_s": 0.242,
+      "answer_length": 1244,
+      "trace_stages": [
+        "api_payload",
+        "repository_selection",
+        "intent_classification",
+        "entity_resolution",
+        "plan_generation",
+        "tool_execution",
+        "tool_output_normalization",
+        "evidence_retrieval",
+        "answer_synthesis",
+        "verification",
+        "api_response"
+      ]
+    },
+    {
+      "label": "Q84",
+      "question": "Construct both the dependency-direction graph and impact-direction graph for ledger, auth and gateway. Compute in-degree, out-degree and transitive reachability for every node in each graph. Explain why reversing edge direction changes graph metrics but not underlying dependency facts.",
+      "status_code": 200,
+      "passed": true,
+      "is_verified": true,
+      "selected_capabilities": [
+        "STATIC_PATH_ANALYSIS"
+      ],
+      "executed_tools": [
+        "STATIC_PATH_ANALYSIS"
+      ],
+      "citations_valid": 1,
+      "paths_valid": 6,
+      "missing_fields": [],
+      "verification_summary": "VERIFIED: 1 citation(s) and 6 path(s) grounded in repository facts; contract satisfied.",
+      "latency_s": 0.175,
+      "answer_length": 1971,
+      "trace_stages": [
+        "api_payload",
+        "repository_selection",
+        "intent_classification",
+        "entity_resolution",
+        "plan_generation",
+        "tool_execution",
+        "tool_output_normalization",
+        "evidence_retrieval",
+        "answer_synthesis",
+        "verification",
+        "api_response"
+      ]
+    },
+    {
+      "label": "Q85",
+      "question": "Determine whether DeployWeave can guarantee exactly-once installation when workers run concurrently. Have the agent produce a formal claim, locate supporting or contradicting evidence, design a concurrency test, execute it if authorized, and save the resulting conclusion with an explicit verification level.",
+      "status_code": 200,
+      "passed": true,
+      "is_verified": true,
+      "selected_capabilities": [
+        "STATIC_PATH_ANALYSIS"
+      ],
+      "executed_tools": [
+        "STATIC_PATH_ANALYSIS"
+      ],
+      "citations_valid": 3,
+      "paths_valid": 0,
+      "missing_fields": [],
+      "verification_summary": "VERIFIED: 3 citation(s) and 0 path(s) grounded in repository facts; contract satisfied.",
+      "latency_s": 0.177,
+      "answer_length": 1647,
+      "trace_stages": [
+        "api_payload",
+        "repository_selection",
+        "intent_classification",
+        "entity_resolution",
+        "plan_generation",
+        "tool_execution",
+        "tool_output_normalization",
+        "evidence_retrieval",
+        "answer_synthesis",
+        "verification",
+        "api_response"
+      ]
+    }
+  ],
+  "q76_q85_batch": {
+    "status_code": 200,
+    "total_questions": 10,
+    "preserved_count": 10,
+    "preserved_labels": [
+      "Q76",
+      "Q77",
+      "Q78",
+      "Q79",
+      "Q80",
+      "Q81",
+      "Q82",
+      "Q83",
+      "Q84",
+      "Q85"
+    ],
+    "missing_labels": [],
+    "coverage_pct": 100.0,
+    "is_verified": true,
+    "completeness_verified": true,
+    "missing_required_fields": [],
+    "latency_s": 2.396,
+    "answer_length": 17972
+  }
+}

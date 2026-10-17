@@ -1,0 +1,31 @@
+{
+  "audit_name": "Q27_CROSS_PROCESS_PERSISTENT_MEMORY",
+  "timestamp": 1791905994.7361646,
+  "graph_identifier": "workspace_repo_orbitops_asterio_c0a361",
+  "repository_id": "repo_orbitops_asterio_c0a361",
+  "process_a": {
+    "pid": 10868,
+    "session_id": "proc_a_sess_1791905993",
+    "finding_id": "finding_qloss_1791905993",
+    "initial_status": "VALID",
+    "snippet_hash": "23e634ec8e990c64b2e9247be62703a76f37f300f09cc3f3e7961d2d7dd1cf4e"
+  },
+  "process_b": {
+    "pid": 10869,
+    "retrieved_session_id": "proc_a_sess_1791905993",
+    "retrieved_finding_id": "finding_qloss_1791905993",
+    "retrieved_provenance": {
+      "source_file": "orbitops/consumer.py",
+      "lines": "7-11"
+    }
+  },
+  "invalidation_test": {
+    "mutated_file": "/home/zeraphynx/Projects/asterion/backend/data/repos/repo_orbitops_asterio_c0a361/OrbitOps_ASTERION_V2_Benchmark/orbitops/consumer.py",
+    "mutated_hash": "40e3a8dfeaec56353d5d4e727ef3f88cae2295b068238d2b97c4b34fa7405afd",
+    "final_status_in_db": "INVALIDATED_STALE",
+    "invalidation_reason": "Source hash mismatch on disk"
+  },
+  "source_restored": true,
+  "restored_hash": "23e634ec8e990c64b2e9247be62703a76f37f300f09cc3f3e7961d2d7dd1cf4e",
+  "cross_process_independence_verified": true
+}

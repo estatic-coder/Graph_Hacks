@@ -1,0 +1,23 @@
+{
+  "baseline": {
+    "status": "ALL_PASSED",
+    "exit_code": 0
+  },
+  "mutant_detected": {
+    "status": "FAILURES_DETECTED",
+    "exit_code": 1,
+    "failed_count": 2,
+    "passed_count": 3
+  },
+  "healed": {
+    "status": "ALL_PASSED",
+    "exit_code": 0
+  },
+  "falkordb_actions_count": 3,
+  "distinction_demonstrated": {
+    "recommendation": 8,
+    "selection": 8,
+    "execution": 5,
+    "mutation_detection": "CONFIRMED"
+  }
+}

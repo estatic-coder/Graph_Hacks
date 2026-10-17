@@ -1,0 +1,31 @@
+{
+  "untrusted_code_execution": {
+    "status": "PASSED",
+    "breach_prevented": true,
+    "mechanism": "Pure Python ast.parse & ast.NodeVisitor without dynamic evaluation or execution",
+    "symbols_parsed": 3
+  },
+  "subprocess_sandbox": {
+    "status": "PASSED",
+    "authorization_gate_enforced": true,
+    "enforced_timeout_seconds": 30,
+    "cwd_isolation": "/home/zeraphynx/Projects/asterion/backend/data/repos/repo_signalforge_aste_d53975/SignalForge_ASTERION_Benchmark_3",
+    "isolation_details": "Human-in-the-loop authorization gate + dedicated subprocess.run with cwd restriction, timeout=30s, and captured output"
+  },
+  "multi_tenant_isolation": {
+    "status": "PASSED",
+    "cross_tenant_leak": false,
+    "mechanism": "Strict physical graph namespacing (workspace_{repo_id}) per tenant/repository in FalkorDB"
+  },
+  "cypher_injection_mitigation": {
+    "status": "PASSED",
+    "injection_prevented": true,
+    "tested_payloads": 4,
+    "mechanism": "Parameterized Cypher parameters ($param) across all FalkorDB client operations"
+  },
+  "resource_cleanup": {
+    "status": "PASSED",
+    "graph_drop_supported": true,
+    "mechanism": "GRAPH.DELETE / safe DETACH DELETE API for complete tenant decommissioning"
+  }
+}

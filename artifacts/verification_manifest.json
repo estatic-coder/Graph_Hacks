@@ -1,0 +1,30 @@
+{
+  "manifest_version": "2.0.0",
+  "generated_at": 1791905997.8405087,
+  "audit_target": "ASTERION V2 OrbitOps Benchmark",
+  "system_status": "HACKATHON_READY_VERIFIED",
+  "artifacts": {
+    "artifacts/memory_verification.json": {
+      "path": "/home/zeraphynx/Projects/asterion/artifacts/memory_verification.json",
+      "sha256": "f76597aed143b82eddd9584a355e005c7c03faa2d5d667520c99efe144cfcda0",
+      "size_bytes": 1249
+    },
+    "artifacts/multi_agent_verification.json": {
+      "path": "/home/zeraphynx/Projects/asterion/artifacts/multi_agent_verification.json",
+      "sha256": "5ecfc0d267d3b001b504f23a3064ba1971685e0bdc04635759c09ac482b57e7f",
+      "size_bytes": 2045
+    },
+    "artifacts/mutation_execution.json": {
+      "path": "/home/zeraphynx/Projects/asterion/artifacts/mutation_execution.json",
+      "sha256": "2e9ea22aae0c3a642f23bf2361de4990b11dfed5326f5aa7d608da5e638d4126",
+      "size_bytes": 3258
+    }
+  },
+  "summary": {
+    "cross_process_memory_verified": true,
+    "multi_agent_coordination_verified": true,
+    "mutation_execution_reconciled": true,
+    "adversarial_cases_rejected": true,
+    "performance_stages_profiled": 8
+  }
+}

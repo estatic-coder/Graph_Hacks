@@ -1,0 +1,408 @@
+{
+  "total_evaluated": 25,
+  "total_passed": 19,
+  "overall_pass_rate": 76.0,
+  "suites": [
+    {
+      "suite": "RelayMesh",
+      "repo_id": "repo_relaymesh_asteri_244812",
+      "total_questions": 10,
+      "passed": 8,
+      "pass_rate_pct": 80.0,
+      "questions": [
+        {
+          "id": "RM_Q1",
+          "topic": "Static vs Queue-Mediated Execution",
+          "passed": true,
+          "score": 60.0,
+          "latency_ms": 729.66,
+          "matched_keywords": [
+            "poll_once",
+            "dispatch",
+            "deliver"
+          ],
+          "citations_valid": 4,
+          "paths_valid": 12,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"What is the complete delivery path to deli..."
+        },
+        {
+          "id": "RM_Q2",
+          "topic": "Initial State Effects",
+          "passed": true,
+          "score": 80.0,
+          "latency_ms": 501.82,
+          "matched_keywords": [
+            "credit",
+            "reserved",
+            "outbox",
+            "0"
+          ],
+          "citations_valid": 3,
+          "paths_valid": 0,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"What is the exact state after submitting a..."
+        },
+        {
+          "id": "RM_Q3",
+          "topic": "Persistent Failure",
+          "passed": true,
+          "score": 100.0,
+          "latency_ms": 733.97,
+          "matched_keywords": [
+            "3",
+            "delivery_timeout",
+            "dead_letter",
+            "quota",
+            "release"
+          ],
+          "citations_valid": 17,
+          "paths_valid": 0,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"What happens when transport deliver fails ..."
+        },
+        {
+          "id": "RM_Q4",
+          "topic": "Transient Failure & Retry Counts",
+          "passed": false,
+          "score": 0.0,
+          "latency_ms": 723.3,
+          "matched_keywords": [
+            "2",
+            "delivery_timeout",
+            "receipt"
+          ],
+          "citations_valid": 14,
+          "paths_valid": 0,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"If delivery times out once and succeeds on..."
+        },
+        {
+          "id": "RM_Q5",
+          "topic": "Conditional Routing (VIP Review)",
+          "passed": false,
+          "score": 0.0,
+          "latency_ms": 500.57,
+          "matched_keywords": [],
+          "citations_valid": 1,
+          "paths_valid": 0,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"How does a VIP high-priority job route thr..."
+        },
+        {
+          "id": "RM_Q12",
+          "topic": "Replay Lifecycle",
+          "passed": true,
+          "score": 100.0,
+          "latency_ms": 496.6,
+          "matched_keywords": [
+            "0",
+            "reset",
+            "delivered",
+            "replay"
+          ],
+          "citations_valid": 9,
+          "paths_valid": 0,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"When a dead-letter job is replayed, are at..."
+        },
+        {
+          "id": "RM_Q14",
+          "topic": "Failed Reservations & Replay Budget",
+          "passed": true,
+          "score": 75.0,
+          "latency_ms": 506.43,
+          "matched_keywords": [
+            "increment",
+            "reserve",
+            "replay"
+          ],
+          "citations_valid": 2,
+          "paths_valid": 0,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"Does REPLAY_COUNTS increment before reserv..."
+        },
+        {
+          "id": "RM_Q16",
+          "topic": "Queue Ownership & Orphan Sweep",
+          "passed": true,
+          "score": 100.0,
+          "latency_ms": 513.14,
+          "matched_keywords": [
+            "sweep_orphans",
+            "release",
+            "quota",
+            "stale"
+          ],
+          "citations_valid": 4,
+          "paths_valid": 0,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"Who calls sweep_orphans in the repository,..."
+        },
+        {
+          "id": "RM_Q17",
+          "topic": "Crash Consistency & State Pop",
+          "passed": true,
+          "score": 100.0,
+          "latency_ms": 553.2,
+          "matched_keywords": [
+            "poll_once",
+            "pop",
+            "dispatch"
+          ],
+          "citations_valid": 2,
+          "paths_valid": 17,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"Does poll_once dispatch a non-queued job, ..."
+        },
+        {
+          "id": "RM_Q19",
+          "topic": "Test-Impact Accuracy",
+          "passed": true,
+          "score": 66.7,
+          "latency_ms": 468.94,
+          "matched_keywords": [
+            "reserved",
+            "worker"
+          ],
+          "citations_valid": 5,
+          "paths_valid": 0,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"If worker does not release reservation on ..."
+        }
+      ]
+    },
+    {
+      "suite": "SignalForge",
+      "repo_id": "repo_signalforge_aste_d53975",
+      "total_questions": 10,
+      "passed": 6,
+      "pass_rate_pct": 60.0,
+      "questions": [
+        {
+          "id": "SF_Q1",
+          "topic": "Static vs Queue Execution",
+          "passed": true,
+          "score": 80.0,
+          "latency_ms": 809.09,
+          "matched_keywords": [
+            "run_worker_once",
+            "dispatch",
+            "send",
+            "queue"
+          ],
+          "citations_valid": 6,
+          "paths_valid": 0,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"Does any producer API directly call send, ..."
+        },
+        {
+          "id": "SF_Q3",
+          "topic": "Persistent Failure & Token Restoration",
+          "passed": false,
+          "score": 0.0,
+          "latency_ms": 636.3,
+          "matched_keywords": [
+            "3",
+            "send_timeout",
+            "failed",
+            "tokens",
+            "release"
+          ],
+          "citations_valid": 10,
+          "paths_valid": 5,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"Under persistent transport failure, how ma..."
+        },
+        {
+          "id": "SF_Q4",
+          "topic": "Transient Failure & Tickets",
+          "passed": false,
+          "score": 0.0,
+          "latency_ms": 814.58,
+          "matched_keywords": [
+            "2",
+            "ticket",
+            "send_timeout",
+            "sent"
+          ],
+          "citations_valid": 12,
+          "paths_valid": 0,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"When send fails once with TimeoutError and..."
+        },
+        {
+          "id": "SF_Q5",
+          "topic": "Critical Severity Review",
+          "passed": false,
+          "score": 25.0,
+          "latency_ms": 486.25,
+          "matched_keywords": [
+            "critical"
+          ],
+          "citations_valid": 0,
+          "paths_valid": 0,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"How are critical team incidents handled? A..."
+        },
+        {
+          "id": "SF_Q7",
+          "topic": "Sandbox Muted Incidents",
+          "passed": false,
+          "score": 0.0,
+          "latency_ms": 520.4,
+          "matched_keywords": [
+            "muted"
+          ],
+          "citations_valid": 1,
+          "paths_valid": 5,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"Are incidents from the sandbox service per..."
+        },
+        {
+          "id": "SF_Q10",
+          "topic": "Regression Detection Tests",
+          "passed": true,
+          "score": 66.7,
+          "latency_ms": 543.62,
+          "matched_keywords": [
+            "test_persistent_failure_releases_budget",
+            "release"
+          ],
+          "citations_valid": 1,
+          "paths_valid": 23,
+          "answer_snippet": "## Direct Answer - Evaluated capability `TEST_ASSERTION_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"Which tests detect when release is omit..."
+        },
+        {
+          "id": "SF_Q14",
+          "topic": "Reopen Limit Enforcement",
+          "passed": true,
+          "score": 66.7,
+          "latency_ms": 467.67,
+          "matched_keywords": [
+            "reopen",
+            "limit"
+          ],
+          "citations_valid": 0,
+          "paths_valid": 0,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"How many reopens are permitted, and what e..."
+        },
+        {
+          "id": "SF_Q16",
+          "topic": "Queue Ownership & Dequeue Sinks",
+          "passed": true,
+          "score": 75.0,
+          "latency_ms": 525.11,
+          "matched_keywords": [
+            "open_incident",
+            "approve",
+            "reopen_failed"
+          ],
+          "citations_valid": 3,
+          "paths_valid": 7,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"Which functions enqueue items into QUEUE, ..."
+        },
+        {
+          "id": "SF_Q21",
+          "topic": "State Store Consistency",
+          "passed": true,
+          "score": 100.0,
+          "latency_ms": 531.46,
+          "matched_keywords": [
+            "no_budget",
+            "save",
+            "review"
+          ],
+          "citations_valid": 1,
+          "paths_valid": 7,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"What is the difference in persistence betw..."
+        },
+        {
+          "id": "SF_Q22",
+          "topic": "Crash Consistency Window",
+          "passed": true,
+          "score": 75.0,
+          "latency_ms": 502.78,
+          "matched_keywords": [
+            "pop",
+            "dispatch",
+            "queue"
+          ],
+          "citations_valid": 4,
+          "paths_valid": 15,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"Does a crash window exist between popping ..."
+        }
+      ]
+    },
+    {
+      "suite": "SentinelShop",
+      "repo_id": "repo_sentinelshop_ast_e1e991",
+      "total_questions": 5,
+      "passed": 5,
+      "pass_rate_pct": 100.0,
+      "questions": [
+        {
+          "id": "SS_Q1",
+          "topic": "Multi-Hop Dependency Path",
+          "passed": true,
+          "score": 100.0,
+          "latency_ms": 589.49,
+          "matched_keywords": [
+            "checkout",
+            "place_order",
+            "authorize_payment",
+            "charge_card"
+          ],
+          "citations_valid": 10,
+          "paths_valid": 1,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"What is the complete call path from checko..."
+        },
+        {
+          "id": "SS_Q2",
+          "topic": "Change Impact & Blast Radius",
+          "passed": true,
+          "score": 100.0,
+          "latency_ms": 561.74,
+          "matched_keywords": [
+            "place_order",
+            "checkout",
+            "reserve_stock",
+            "send_order_confirmation"
+          ],
+          "citations_valid": 8,
+          "paths_valid": 19,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"If authorize_payment changes to reject all..."
+        },
+        {
+          "id": "SS_Q3",
+          "topic": "Negative-Path Reasoning",
+          "passed": true,
+          "score": 50.0,
+          "latency_ms": 460.72,
+          "matched_keywords": [
+            "payment",
+            "declined"
+          ],
+          "citations_valid": 0,
+          "paths_valid": 0,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"When a high-risk user attempts checkout, d..."
+        },
+        {
+          "id": "SS_Q4",
+          "topic": "Shared Dependency Analysis",
+          "passed": true,
+          "score": 100.0,
+          "latency_ms": 414.78,
+          "matched_keywords": [
+            "checkout",
+            "order_history",
+            "verify_session"
+          ],
+          "citations_valid": 1,
+          "paths_valid": 8,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"Which functions depend directly or indirec..."
+        },
+        {
+          "id": "SS_Q6",
+          "topic": "Source Citation & Explainability",
+          "passed": true,
+          "score": 100.0,
+          "latency_ms": 514.85,
+          "matched_keywords": [
+            "api.py",
+            "orders.py",
+            "place_order"
+          ],
+          "citations_valid": 7,
+          "paths_valid": 1,
+          "answer_snippet": "## Direct Answer - Evaluated capability `STATIC_PATH_ANALYSIS`: Execution completed successfully.  ### Investigation Summary **Query**: *\"Show the source paths and line ranges supp..."
+        }
+      ]
+    }
+  ]
+}

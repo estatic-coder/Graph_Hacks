@@ -1,0 +1,152 @@
+{
+  "q51": {
+    "SLOTS": {
+      "auth": 1,
+      "ledger": 2,
+      "gateway": 1
+    },
+    "LOCKED": [],
+    "VERSIONS": {
+      "auth": "3.0",
+      "ledger": "1.0",
+      "gateway": "1.0"
+    },
+    "READY": [],
+    "CHECKS": {
+      "r1": 3,
+      "r2": 1
+    },
+    "CHANGES": [
+      [
+        "r1",
+        "1.0",
+        "2.0"
+      ],
+      [
+        "r1",
+        "2.0",
+        "1.0"
+      ],
+      [
+        "r2",
+        "1.0",
+        "3.0"
+      ]
+    ],
+    "EVENTS": [
+      [
+        "r1",
+        "ready"
+      ],
+      [
+        "r1",
+        "health_failed"
+      ],
+      [
+        "r1",
+        "health_failed"
+      ],
+      [
+        "r1",
+        "health_failed"
+      ],
+      [
+        "r1",
+        "rolled_back"
+      ],
+      [
+        "r2",
+        "ready"
+      ],
+      [
+        "r2",
+        "deployed"
+      ]
+    ],
+    "AUDIT": [
+      [
+        "r1",
+        "installed"
+      ],
+      [
+        "r1",
+        "restored"
+      ],
+      [
+        "r2",
+        "installed"
+      ]
+    ],
+    "NOTICES": [
+      [
+        "r1",
+        "rolled_back"
+      ],
+      [
+        "r2",
+        "deployed"
+      ]
+    ]
+  },
+  "q52": {
+    "SLOTS": {
+      "auth": 1,
+      "ledger": 2,
+      "gateway": 1
+    },
+    "LOCKED": [],
+    "VERSIONS": {
+      "auth": "2.0",
+      "ledger": "1.0",
+      "gateway": "1.0"
+    },
+    "CHANGES": [
+      [
+        "r1",
+        "1.0",
+        "2.0"
+      ],
+      [
+        "r2",
+        "2.0",
+        "3.0"
+      ],
+      [
+        "r2",
+        "3.0",
+        "2.0"
+      ]
+    ],
+    "AUDIT": [
+      [
+        "r1",
+        "installed"
+      ],
+      [
+        "r2",
+        "installed"
+      ],
+      [
+        "r2",
+        "restored"
+      ]
+    ]
+  },
+  "q66": {
+    "failing_tests": [
+      "test_missing_dependency_blocks_persisted",
+      "test_missing_dependency_blocks_persisted"
+    ],
+    "exit_code": 1
+  },
+  "q70": {
+    "failing_tests": [],
+    "exit_code": 0
+  },
+  "q75": {
+    "r1_status": "rolled_back",
+    "r2_status": "deployed",
+    "final_version": "3.0",
+    "clobbered_detected": false
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "db_path": "app.db",
+  "api_port": 8080
+}

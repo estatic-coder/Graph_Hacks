@@ -1,0 +1,38 @@
+{
+  "audit_name": "Q30_INDEPENDENT_MUTATION_VERIFICATION",
+  "timestamp": 1791905997.0588832,
+  "repository_id": "repo_orbitops_asterio_c0a361",
+  "source_file_mutated": "orbitops/worker.py",
+  "applied_diff": "--- /home/zeraphynx/Projects/asterion/backend/data/repos/repo_orbitops_asterio_c0a361/OrbitOps_ASTERION_V2_Benchmark/orbitops/worker.py\t2026-10-13 08:52:57.943165814 +0530\n+++ /tmp/asterion_independent_sandbox_0muqq0x5/orbitops_benchmark/orbitops/worker.py\t2026-10-13 21:09:56.575653459 +0530\n@@ -16,7 +16,6 @@\n         emit(alert.alert_id, \"sent\")\n         notify(alert.alert_id, \"sent\")\n         return save(alert)\n-    release(alert)\n     alert.status = \"failed\"\n     emit(alert.alert_id, \"failed\")\n     notify(alert.alert_id, \"failed\")\n",
+  "executable_command": "/home/zeraphynx/Projects/asterion/backend/.venv/bin/pytest tests/test_orbitops.py -v --tb=short",
+  "process_exit_code": 1,
+  "duration_sec": 0.479,
+  "discovered_tests_count": 14,
+  "collected_tests_count": 14,
+  "passed_count": 11,
+  "failed_count": 3,
+  "skipped_count": 0,
+  "errored_count": 0,
+  "failed_test_names": [
+    "test_exhausted_releases",
+    "test_no_auto_sweep_needed_on_failure",
+    "test_reopen_after_recovery"
+  ],
+  "passed_test_names": [
+    "test_decline_has_no_hold",
+    "test_empty_queue",
+    "test_high_severity_review",
+    "test_initial_credit_failure_not_saved",
+    "test_initial_enqueue_no_send",
+    "test_muted_not_saved",
+    "test_no_double_dispatch",
+    "test_reopen_once_only",
+    "test_security_review",
+    "test_send_success",
+    "test_timeout_once"
+  ],
+  "counts_reconciled": true,
+  "expected_detectors_confirmed": true,
+  "original_repo_unmodified": true,
+  "raw_stdout_excerpt": "============================= test session starts ==============================\nplatform linux -- Python 3.14.7, pytest-9.1.1, pluggy-1.6.0 -- /home/zeraphynx/Projects/asterion/backend/.venv/bin/python3\ncachedir: .pytest_cache\nrootdir: /tmp/asterion_independent_sandbox_0muqq0x5/orbitops_benchmark\nplugins: anyio-4.15.1\ncollecting ... collected 14 items\n\ntests/test_orbitops.py::OrbitOpsTests::test_decline_has_no_hold PASSED   [  7%]\ntests/test_orbitops.py::OrbitOpsTests::test_empty_queue PASSED           [ 14%]\ntests/test_orbitops.py::OrbitOpsTests::test_exhausted_releases FAILED    [ 21%]\ntests/test_orbitops.py::OrbitOpsTests::test_high_severity_review PASSED  [ 28%]\ntests/test_orbitops.py::OrbitOpsTests::test_initial_credit_failure_not_saved PASSED [ 35%]\ntests/test_orbitops.py::OrbitOpsTests::test_initial_enqueue_no_send PASSED [ 42%]\ntests/test_orbitops.py::OrbitOpsTests::test_muted_not_saved PASSED       [ 50%]\ntests/test_orbitops.py::OrbitOpsTests::test_no_auto_sweep_needed_on_failure FAILED [ 57%]\ntests/test_orbitops.py::OrbitOpsTests::test_no_double_dispatch PASSED    [ 64%]\ntests/test_orbitops.py::OrbitOpsTests::test_reopen_after_recovery FAILED [ 71%]\ntests/test_orbitops.py::OrbitOpsTests::test_reopen_once_only PASSED      [ 78%]\ntests/test_orbitops.py::OrbitOpsTests::test_security_review PASSED       [ 85%]\ntests/test_orbitops.py::OrbitOpsTests::test_send_success PASSED          [ 92%]\ntests/test_orbitops.py::OrbitOpsTests::test_timeout_once PASSED          [100%]\n\n"
+}

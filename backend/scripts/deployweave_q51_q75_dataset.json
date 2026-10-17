@@ -1,0 +1,152 @@
+[
+  {
+    "index": 1,
+    "label": "Q51",
+    "raw_text": "Q51. Starting with the default DeployWeave state, submit a staging auth v2.0 rollout, let it fail all health probes and roll back, then submit a new staging auth v3.0 rollout that succeeds. Calculate the final SLOTS, LOCKED, VERSIONS, READY, CHECKS, CHANGES, EVENTS and AUDIT. Distinguish state scoped per rollout from state shared across rollouts.",
+    "cleaned_text": "Starting with the default DeployWeave state, submit a staging auth v2.0 rollout, let it fail all health probes and roll back, then submit a new staging auth v3.0 rollout that succeeds. Calculate the final SLOTS, LOCKED, VERSIONS, READY, CHECKS, CHANGES, EVENTS and AUDIT. Distinguish state scoped per rollout from state shared across rollouts."
+  },
+  {
+    "index": 2,
+    "label": "Q52",
+    "raw_text": "Q52. Two staging auth rollouts, r1 and r2, are submitted sequentially when SLOTS['auth'] is initially 2. Both are queued. r1 succeeds, but r2 fails all health probes. Trace execution in FIFO order and calculate the final available slots, version, lock state, audit history and registry changes. Explain why r2's rollback target matters.",
+    "cleaned_text": "Two staging auth rollouts, r1 and r2, are submitted sequentially when SLOTS['auth'] is initially 2. Both are queued. r1 succeeds, but r2 fails all health probes. Trace execution in FIFO order and calculate the final available slots, version, lock state, audit history and registry changes. Explain why r2's rollback target matters."
+  },
+  {
+    "index": 3,
+    "label": "Q53",
+    "raw_text": "Q53. Suppose a production gateway rollout is submitted while the ledger version is absent. Later the ledger version is restored, but gateway remains blocked. Does calling approve_rollout() now work? Derive the answer from the persisted status and approval guard. Identify the minimum workflow change needed for recovery.",
+    "cleaned_text": "Suppose a production gateway rollout is submitted while the ledger version is absent. Later the ledger version is restored, but gateway remains blocked. Does calling approve_rollout() now work? Derive the answer from the persisted status and approval guard. Identify the minimum workflow change needed for recovery."
+  },
+  {
+    "index": 4,
+    "label": "Q54",
+    "raw_text": "Q54. Suppose execute(r) installs version 2.0, the first probe fails, and the second succeeds. Compare the intermediate version, number of installations, final attempts, registry changes and final slot balance. Does each probe retry repeat installation?",
+    "cleaned_text": "Suppose execute(r) installs version 2.0, the first probe fails, and the second succeeds. Compare the intermediate version, number of installations, final attempts, registry changes and final slot balance. Does each probe retry repeat installation?"
+  },
+  {
+    "index": 5,
+    "label": "Q55",
+    "raw_text": "Q55. A failed rollout has ROLLBACK_COUNTS[k] = 1 and MAX_ROLLBACKS = 1. An operator manually restores capacity and calls retry_rollout(k). Can capacity availability override the retry limit? Show the first guard that stops execution.",
+    "cleaned_text": "A failed rollout has ROLLBACK_COUNTS[k] = 1 and MAX_ROLLBACKS = 1. An operator manually restores capacity and calls retry_rollout(k). Can capacity availability override the retry limit? Show the first guard that stops execution."
+  },
+  {
+    "index": 6,
+    "label": "Q56",
+    "raw_text": "Q56. Construct both the dependency-direction graph and impact-direction graph for ledger, auth and gateway. Compute in-degree, out-degree and transitive reachability for every node in each graph. Explain why reversing edge direction changes graph metrics but not underlying dependency facts.",
+    "cleaned_text": "Construct both the dependency-direction graph and impact-direction graph for ledger, auth and gateway. Compute in-degree, out-degree and transitive reachability for every node in each graph. Explain why reversing edge direction changes graph metrics but not underlying dependency facts."
+  },
+  {
+    "index": 7,
+    "label": "Q57",
+    "raw_text": "Q57. Introduce service reporting depending on gateway and service analytics depending on auth and ledger. Enumerate every distinct simple path beginning at ledger and ending at any other service. Count paths separately from unique reachable nodes, without double-counting shared destinations.",
+    "cleaned_text": "Introduce service reporting depending on gateway and service analytics depending on auth and ledger. Enumerate every distinct simple path beginning at ledger and ending at any other service. Count paths separately from unique reachable nodes, without double-counting shared destinations."
+  },
+  {
+    "index": 8,
+    "label": "Q58",
+    "raw_text": "Q58. Remove the direct gateway-to-ledger dependency while retaining gateway-to-auth and auth-to-ledger. Compare reachability, shortest dependency paths, number of simple paths and downstream blast radius before and after. Which measures change and which remain identical?",
+    "cleaned_text": "Remove the direct gateway-to-ledger dependency while retaining gateway-to-auth and auth-to-ledger. Compare reachability, shortest dependency paths, number of simple paths and downstream blast radius before and after. Which measures change and which remain identical?"
+  },
+  {
+    "index": 9,
+    "label": "Q59",
+    "raw_text": "Q59. Add a new edge representing ledger depending on gateway. Compute the strongly connected components, condensation graph and whether a topological ordering exists. Explain why applying topological sort to the condensation graph is different from sorting the original cyclic graph.",
+    "cleaned_text": "Add a new edge representing ledger depending on gateway. Compute the strongly connected components, condensation graph and whether a topological ordering exists. Explain why applying topological sort to the condensation graph is different from sorting the original cyclic graph."
+  },
+  {
+    "index": 10,
+    "label": "Q60",
+    "raw_text": "Q60. Suppose an ASTERION agent must choose between shortest_path, strongly_connected_components, reverse_dependencies and community_detection to investigate a circular rollout dependency. Which tool should it choose first and why? Show the tool-selection evidence and compare the result with an alternative algorithm.",
+    "cleaned_text": "Suppose an ASTERION agent must choose between shortest_path, strongly_connected_components, reverse_dependencies and community_detection to investigate a circular rollout dependency. Which tool should it choose first and why? Show the tool-selection evidence and compare the result with an alternative algorithm."
+  },
+  {
+    "index": 11,
+    "label": "Q61",
+    "raw_text": "Q61. A rollout has been dequeued and installed, but execution stops immediately before its first health probe. Distinguish the state visible to another thread in the same process, a fresh Python process, and a restarted process. Do not assume shared persistence where none exists.",
+    "cleaned_text": "A rollout has been dequeued and installed, but execution stops immediately before its first health probe. Distinguish the state visible to another thread in the same process, a fresh Python process, and a restarted process. Do not assume shared persistence where none exists."
+  },
+  {
+    "index": 12,
+    "label": "Q62",
+    "raw_text": "Q62. Two worker threads call poll_once() when READY contains two rollouts targeting the same service. Enumerate plausible interleavings affecting VERSIONS, CHANGES and rollback restoration. Identify whether the final version is deterministic, and distinguish demonstrated races from hypothetical interleavings.",
+    "cleaned_text": "Two worker threads call poll_once() when READY contains two rollouts targeting the same service. Enumerate plausible interleavings affecting VERSIONS, CHANGES and rollback restoration. Identify whether the final version is deterministic, and distinguish demonstrated races from hypothetical interleavings."
+  },
+  {
+    "index": 13,
+    "label": "Q63",
+    "raw_text": "Q63. Consider two rollouts targeting auth, one installing v2.0 and one installing v3.0. Rollout r1 captures old='1.0', installs v2.0, then r2 captures old='2.0' and installs v3.0. r1 subsequently fails and restores v1.0 while r2 succeeds. What final state combinations are possible, and which invariant is violated?",
+    "cleaned_text": "Consider two rollouts targeting auth, one installing v2.0 and one installing v3.0. Rollout r1 captures old='1.0', installs v2.0, then r2 captures old='2.0' and installs v3.0. r1 subsequently fails and restores v1.0 while r2 succeeds. What final state combinations are possible, and which invariant is violated?"
+  },
+  {
+    "index": 14,
+    "label": "Q64",
+    "raw_text": "Q64. Suppose the worker executes install(r), then an unexpected exception occurs before any health probe. Which cleanup operations run automatically? What happens to the slot reservation, rollout status and registry version? Compare this with a caught health-probe failure.",
+    "cleaned_text": "Suppose the worker executes install(r), then an unexpected exception occurs before any health probe. Which cleanup operations run automatically? What happens to the slot reservation, rollout status and registry version? Compare this with a caught health-probe failure."
+  },
+  {
+    "index": 15,
+    "label": "Q65",
+    "raw_text": "Q65. Design a minimal crash-recovery strategy for READY that introduces a processing or in-flight state with acknowledgment. Specify the new states and graph edges, and identify which existing functions must change. Clearly distinguish the proposed design from existing DeployWeave behavior.",
+    "cleaned_text": "Design a minimal crash-recovery strategy for READY that introduces a processing or in-flight state with acknowledgment. Specify the new states and graph edges, and identify which existing functions must change. Clearly distinguish the proposed design from existing DeployWeave behavior."
+  },
+  {
+    "index": 16,
+    "label": "Q66",
+    "raw_text": "Q66. Mutate dependencies_healthy() so that it returns True whenever a dependency name exists in DEPENDENCIES, even if its entry is missing from VERSIONS. Predict the affected deployment decisions and tests. If authorized, execute the mutation and compare predictions with empirical results.",
+    "cleaned_text": "Mutate dependencies_healthy() so that it returns True whenever a dependency name exists in DEPENDENCIES, even if its entry is missing from VERSIONS. Predict the affected deployment decisions and tests. If authorized, execute the mutation and compare predictions with empirical results."
+  },
+  {
+    "index": 17,
+    "label": "Q67",
+    "raw_text": "Q67. Move install(r) inside the probe retry loop so that every retry reinstalls the target version. What changes in CHANGES and AUDIT for an always-failing rollout and a first-fail-second-success rollout? Identify tests that currently observe these differences and tests that would need additional assertions.",
+    "cleaned_text": "Move install(r) inside the probe retry loop so that every retry reinstalls the target version. What changes in CHANGES and AUDIT for an always-failing rollout and a first-fail-second-success rollout? Identify tests that currently observe these differences and tests that would need additional assertions."
+  },
+  {
+    "index": 18,
+    "label": "Q68",
+    "raw_text": "Q68. Move refund(r) to execute before restore(r, old) in the rollback branch. Does this change successful sequential outcomes? Analyze the intermediate crash windows, observable consistency and whether existing tests can detect the ordering change.",
+    "cleaned_text": "Move refund(r) to execute before restore(r, old) in the rollback branch. Does this change successful sequential outcomes? Analyze the intermediate crash windows, observable consistency and whether existing tests can detect the ordering change."
+  },
+  {
+    "index": 19,
+    "label": "Q69",
+    "raw_text": "Q69. Remove the READY status guard from poll_once(). Determine whether ordinary sequential API calls expose a bug. Then construct a controlled setup with a stale queue entry and a terminal-state rollout to demonstrate the behavioral difference. Separate normal reachability from injected-state testing.",
+    "cleaned_text": "Remove the READY status guard from poll_once(). Determine whether ordinary sequential API calls expose a bug. Then construct a controlled setup with a stale queue entry and a terminal-state rollout to demonstrate the behavioral difference. Separate normal reachability from injected-state testing."
+  },
+  {
+    "index": 20,
+    "label": "Q70",
+    "raw_text": "Q70. Change acquire(r) to check SLOTS[r.service] after decrementing instead of before. Investigate zero-capacity and one-capacity cases, possible negative balances, reservation consistency and tests that would detect the regression. Give a minimal safe correction.",
+    "cleaned_text": "Change acquire(r) to check SLOTS[r.service] after decrementing instead of before. Investigate zero-capacity and one-capacity cases, possible negative balances, reservation consistency and tests that would detect the regression. Give a minimal safe correction."
+  },
+  {
+    "index": 21,
+    "label": "Q71",
+    "raw_text": "Q71. Store a verified finding that a deployment's dependency checks only test VERSIONS membership, not live health. In a later independent session, retrieve this finding to investigate a gateway outage. Show the exact memory retrieval, graph traversal, evidence and how the remembered fact changes the next selected tool.",
+    "cleaned_text": "Store a verified finding that a deployment's dependency checks only test VERSIONS membership, not live health. In a later independent session, retrieve this finding to investigate a gateway outage. Show the exact memory retrieval, graph traversal, evidence and how the remembered fact changes the next selected tool."
+  },
+  {
+    "index": 22,
+    "label": "Q72",
+    "raw_text": "Q72. Create two conflicting hypotheses: H1 says gateway staging always enters review because it is critical, while H2 says it can be blocked by missing dependencies before review. Have two independent agents gather evidence, and a third reviewer resolve the conflict based on control-flow order. Show actual FalkorDB task and evidence records, not scripted final answers.",
+    "cleaned_text": "Create two conflicting hypotheses: H1 says gateway staging always enters review because it is critical, while H2 says it can be blocked by missing dependencies before review. Have two independent agents gather evidence, and a third reviewer resolve the conflict based on control-flow order. Show actual FalkorDB task and evidence records, not scripted final answers."
+  },
+  {
+    "index": 23,
+    "label": "Q73",
+    "raw_text": "Q73. Use FalkorDB to select tests affected by removing restore(r, old). First predict likely detectors using graph and assertion dependencies, then execute an authorized isolated mutation. Provide the raw execution receipt and explain any mismatch between predicted and observed failures.",
+    "cleaned_text": "Use FalkorDB to select tests affected by removing restore(r, old). First predict likely detectors using graph and assertion dependencies, then execute an authorized isolated mutation. Provide the raw execution receipt and explain any mismatch between predicted and observed failures."
+  },
+  {
+    "index": 24,
+    "label": "Q74",
+    "raw_text": "Q74. Perform a controlled A/B graph experiment: in graph A, gateway directly depends on ledger; in graph B, the direct dependency is removed but the indirect dependency through auth remains. Ask the same blast-radius question in both graphs. Record whether ASTERION changes its chosen tool, traversal, evidence path and final conclusion appropriately.",
+    "cleaned_text": "Perform a controlled A/B graph experiment: in graph A, gateway directly depends on ledger; in graph B, the direct dependency is removed but the indirect dependency through auth remains. Ask the same blast-radius question in both graphs. Record whether ASTERION changes its chosen tool, traversal, evidence path and final conclusion appropriately."
+  },
+  {
+    "index": 25,
+    "label": "Q75",
+    "raw_text": "Q75. Determine whether DeployWeave can guarantee exactly-once installation when workers run concurrently. Have the agent produce a formal claim, locate supporting or contradicting evidence, design a concurrency test, execute it if authorized, and save the resulting conclusion with an explicit verification level.",
+    "cleaned_text": "Determine whether DeployWeave can guarantee exactly-once installation when workers run concurrently. Have the agent produce a formal claim, locate supporting or contradicting evidence, design a concurrency test, execute it if authorized, and save the resulting conclusion with an explicit verification level."
+  }
+]

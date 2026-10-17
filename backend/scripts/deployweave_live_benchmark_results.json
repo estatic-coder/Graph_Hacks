@@ -1,0 +1,81 @@
+{
+  "Q26": {
+    "ranking_before": [
+      [
+        "ledger",
+        2,
+        3
+      ],
+      [
+        "auth",
+        1,
+        1
+      ],
+      [
+        "gateway",
+        0,
+        0
+      ]
+    ],
+    "ranking_after": [
+      [
+        "ledger",
+        3,
+        7
+      ],
+      [
+        "auth",
+        2,
+        3
+      ],
+      [
+        "gateway",
+        1,
+        1
+      ],
+      [
+        "reporting",
+        0,
+        0
+      ]
+    ],
+    "delta": "Adding reporting downstream of gateway increased ledger's downstream reach to 3, auth's to 2, and gateway's from 0 to 1."
+  },
+  "Q27": {
+    "finding_id": "finding_queue_loss_1791909062",
+    "initial_status": "VERIFIED",
+    "retrieved_in_proc_b": true,
+    "final_status": "STALE_INVALIDATED",
+    "invalidation_reason": "Source file deployweave/consumer.py modified (hash mismatch: a949280220416c05 != dca73a7f047dba9b)"
+  },
+  "Q28": {
+    "investigation_id": "inv_dw_rollback_1791909063",
+    "roles": [
+      "GRAPH_INVESTIGATOR",
+      "EXECUTION_ANALYST",
+      "HYPOTHESIS_ENGINE",
+      "EVIDENCE_REVIEWER"
+    ],
+    "verdict": "VERIFIED_CORRECT_ROLLBACK"
+  },
+  "Q29": {
+    "team": "Platform Delivery Engineering",
+    "engineer": "Marcus Vance",
+    "handle": "@mvance",
+    "adr_id": "ADR-042",
+    "adr_decision": "Enforce MAX_HEALTH_RETRIES=2 with immediate rollback and slot refund upon failure exhaustion.",
+    "provenance": "SYNTHETIC_ORGANIZATIONAL_DATA"
+  },
+  "Q30": {
+    "collected": 20,
+    "passed": 17,
+    "failed": 3,
+    "exit_code": 1,
+    "failing_tests": [
+      "test_permanent_bad_rolls_back",
+      "test_retry_after_rollback_success",
+      "test_sweep_not_needed_after_rollback"
+    ],
+    "prediction_accuracy": "100% (3/3 matches)"
+  }
+}

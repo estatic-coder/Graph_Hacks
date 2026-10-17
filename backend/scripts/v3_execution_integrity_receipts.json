@@ -1,0 +1,120 @@
+{
+  "q49_multi_agent": {
+    "decision": "RESOLVED_BLOCKED_PRECEDES_REVIEW",
+    "winning_status": "blocked",
+    "reason": "missing dependency (ledger)",
+    "review_branch_reached": false,
+    "queue_state": "unchanged",
+    "slot_reservation": "not acquired",
+    "precedence_proof": "dependencies_healthy check (Line 10) executes BEFORE choice == 'review' check (Line 12). Rollout terminates with status 'blocked' and returns save(r) without reaching review.",
+    "citations": [
+      "deployweave/intake.py:line 10",
+      "deployweave/intake.py:line 12"
+    ]
+  },
+  "q46_schema_audit": {
+    "proposed_query": "MATCH (s:Service {name: 'auth'})-[:DEPENDS_ON]->(dep:Service) RETURN dep.name, dep.version, dep.status",
+    "query_classification": "PROPOSED_QUERY (Schema Assumption)",
+    "executed_query": "MATCH (s:Service) RETURN s.name, keys(s) as properties LIMIT 5",
+    "execution_status": "EXECUTED_QUERY",
+    "verified_result": {
+      "has_version_property": false,
+      "has_status_property": false,
+      "stored_properties": {
+        "ledger": [
+          "name"
+        ],
+        "auth": [
+          "name"
+        ],
+        "gateway": [
+          "name"
+        ],
+        "reporting": [
+          "name"
+        ]
+      }
+    },
+    "resolution": "FalkorDB graph stores architectural dependency topology (:Service, :DEPENDS_ON, :IMPACTS), but does NOT store dynamic runtime live version or status properties. Dynamic versions are managed in-memory in deployweave/registry.py:VERSIONS. Therefore, the inquiry must retrieve version status from source configuration inspection."
+  },
+  "q43_mutation": {
+    "mutation": "remove_commit_success",
+    "receipt_id": "receipt_remove_commit_success_1791912946",
+    "diff": "--- a/deployweave/worker.py\n+++ b/deployweave/worker.py\n@@ -10,7 +10,7 @@\n     while r.attempts <= MAX_HEALTH_RETRIES:\n         r.attempts += 1\n         if probe(r.rollout_id):\n-            commit(r)\n+            # commit(r) removed\n             r.status='deployed'\n             emit(r.rollout_id,'deployed')\n             notify(r.rollout_id,'deployed')\n",
+    "orig_hash": "ba894b1fdda2ab29dcba43ee6116f34cd4379ed30cd0ea683afd75ebd30739e8",
+    "mut_hash": "5456adcb61ebccdcd2602a5377c8306266603c8d1bd5626ac887e00c18dbe9e8",
+    "exit_code": 1,
+    "passed_count": 19,
+    "failed_count": 1,
+    "failing_tests": [
+      "test_success_installs_and_commits"
+    ],
+    "duration_ms": 351.05
+  },
+  "q44_mutation": {
+    "mutation": "remove_restore_rollback",
+    "receipt_id": "receipt_remove_restore_rollback_1791912946",
+    "diff": "--- a/deployweave/worker.py\n+++ b/deployweave/worker.py\n@@ -16,7 +16,7 @@\n             notify(r.rollout_id,'deployed')\n             return save(r)\n         emit(r.rollout_id,'health_failed')\n-    restore(r,old)\n+    # restore(r,old) removed\n     audit(r.rollout_id,'restored')\n     refund(r)\n     r.status='rolled_back'\n",
+    "orig_hash": "ba894b1fdda2ab29dcba43ee6116f34cd4379ed30cd0ea683afd75ebd30739e8",
+    "mut_hash": "181b42d6e27ade2ca24f3174a0fe49c1fb9348bf6c091e82ddd427897d2cda3d",
+    "exit_code": 1,
+    "passed_count": 19,
+    "failed_count": 1,
+    "failing_tests": [
+      "test_permanent_bad_rolls_back"
+    ],
+    "duration_ms": 347.33
+  },
+  "differential_graph_validation": {
+    "reachability": {
+      "ledger": [
+        "auth",
+        "gateway"
+      ],
+      "auth": [
+        "gateway"
+      ],
+      "gateway": []
+    },
+    "simple_paths_ledger_to_gateway": [
+      [
+        "ledger",
+        "auth",
+        "gateway"
+      ],
+      [
+        "ledger",
+        "gateway"
+      ]
+    ],
+    "sccs": [
+      [
+        "gateway"
+      ],
+      [
+        "auth"
+      ],
+      [
+        "ledger"
+      ]
+    ],
+    "cycles": [],
+    "topological_sort": [
+      "ledger",
+      "auth",
+      "gateway"
+    ],
+    "ab_experiment": {
+      "experiment_a_relevant": {
+        "before": 2,
+        "after": 3,
+        "impacted": true
+      },
+      "experiment_b_irrelevant": {
+        "before": 2,
+        "after": 2,
+        "impacted": false
+      }
+    }
+  }
+}

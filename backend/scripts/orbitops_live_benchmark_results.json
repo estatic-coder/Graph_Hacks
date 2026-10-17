@@ -1,0 +1,232 @@
+{
+  "timestamp": 1791904403.4512093,
+  "total": 14,
+  "passed": 14,
+  "failed": 0,
+  "results": [
+    {
+      "id": "Q1",
+      "status": "PASS",
+      "elapsed_sec": 0.82,
+      "dimensions": {
+        "source_verified": true,
+        "graph_verified": true,
+        "scenario_verified": true,
+        "execution_verified": false,
+        "memory_persistence_verified": false,
+        "multi_agent_handoff_verified": false
+      },
+      "checks_passed": true,
+      "failed_checks": [],
+      "answer_preview": "## Direct Answer\n- **Synchronous CALLS paths to send_page()**: There is **NO synchronous CALLS path** from `create_alert()`, `approve_alert()`, or `retry_failed_alert()` to `send_page()` [`orbitops/api.py:5-23`].\n- **Producer Entrypoints & Queueing**:\n  - `create_alert()` -> `intake.submit()` -> `st"
+    },
+    {
+      "id": "Q2",
+      "status": "PASS",
+      "elapsed_sec": 0.68,
+      "dimensions": {
+        "source_verified": false,
+        "graph_verified": true,
+        "scenario_verified": true,
+        "execution_verified": false,
+        "memory_persistence_verified": false,
+        "multi_agent_handoff_verified": false
+      },
+      "checks_passed": true,
+      "failed_checks": [],
+      "answer_preview": "## Direct Answer\n- **Complete Static CALLS Chain**: `run_agent_once()` -> `consumer.drain_one()` -> `worker.deliver()` -> `pager.send_page()` [`orbitops/api.py:17`, `orbitops/consumer.py:11`, `orbitops/worker.py:11`].\n- **Guards Preventing Reaching send_page()**:\n  1. **Empty Queue Guard**: In `orbi"
+    },
+    {
+      "id": "Q5",
+      "status": "PASS",
+      "elapsed_sec": 0.73,
+      "dimensions": {
+        "source_verified": true,
+        "graph_verified": true,
+        "scenario_verified": true,
+        "execution_verified": false,
+        "memory_persistence_verified": false,
+        "multi_agent_handoff_verified": false
+      },
+      "checks_passed": true,
+      "failed_checks": [],
+      "answer_preview": "## Direct Answer\n- **status**: `'pending'` [`orbitops/intake.py:21-25`]\n- **BALANCE**: `{'core': 3, 'security': 2}` (team `'core'` decremented from 4 to 3 by `hold(alert)`) [`orbitops/credits.py:7-10`]\n- **HELD**: `{'a1'}` (reservation active; `alert.reserved = True`) [`orbitops/credits.py:8`]\n- **P"
+    },
+    {
+      "id": "Q6",
+      "status": "PASS",
+      "elapsed_sec": 0.62,
+      "dimensions": {
+        "source_verified": true,
+        "graph_verified": true,
+        "scenario_verified": true,
+        "execution_verified": false,
+        "memory_persistence_verified": false,
+        "multi_agent_handoff_verified": false
+      },
+      "checks_passed": true,
+      "failed_checks": [],
+      "answer_preview": "## Direct Answer\n- **Trace across three distinct API entrypoints**:\n  1. **Phase 1: Creation (`create_alert(\"a1\", team=\"security\", severity=3)`)** [`orbitops/api.py:5-7`]:\n     - Policy check: `policy.decide()` routes team `'security'` to status `'review'` [`orbitops/policy.py:4`].\n     - State effe"
+    },
+    {
+      "id": "Q7",
+      "status": "PASS",
+      "elapsed_sec": 0.75,
+      "dimensions": {
+        "source_verified": false,
+        "graph_verified": true,
+        "scenario_verified": true,
+        "execution_verified": false,
+        "memory_persistence_verified": false,
+        "multi_agent_handoff_verified": false
+      },
+      "checks_passed": true,
+      "failed_checks": [],
+      "answer_preview": "## Direct Answer\n\n### Part 1: Analysis for \"For an alert with severity 9 and team core, does create_alert() reserve credits or enqueue the alert?\"\n\n- **Does severity 9 with team core reserve credits or enqueue on creation?**: **NO**, it does NOT reserve credits and does NOT enqueue on creation [`orb"
+    },
+    {
+      "id": "Q9",
+      "status": "PASS",
+      "elapsed_sec": 0.87,
+      "dimensions": {
+        "source_verified": true,
+        "graph_verified": true,
+        "scenario_verified": true,
+        "execution_verified": false,
+        "memory_persistence_verified": false,
+        "multi_agent_handoff_verified": false
+      },
+      "checks_passed": true,
+      "failed_checks": [],
+      "answer_preview": "## Direct Answer\n- **pager calls**: **3 calls** (`send_page()` called on initial attempt `0`, retry attempt `1`, and retry attempt `2`; loop condition `while alert.attempts <= MAX_ATTEMPTS:`) [`orbitops/worker.py:9-10`].\n- **timeouts**: **3 page_timeout events** (each `TimeoutError` caught and emitt"
+    },
+    {
+      "id": "Q11",
+      "status": "PASS",
+      "elapsed_sec": 0.9,
+      "dimensions": {
+        "source_verified": true,
+        "graph_verified": true,
+        "scenario_verified": true,
+        "execution_verified": false,
+        "memory_persistence_verified": false,
+        "multi_agent_handoff_verified": false
+      },
+      "checks_passed": true,
+      "failed_checks": [],
+      "answer_preview": "## Direct Answer\n- **If MAX_ATTEMPTS changes to 4**:\n  - **Permanent failure**:\n    - **Maximum pager calls**: **5 calls** (`attempts` runs 0, 1, 2, 3, 4; `while alert.attempts <= 4:`) [`orbitops/worker.py:9-10`].\n    - **Timeout events**: **5 page_timeout events** (`('a1', 'page_timeout')` emitted "
+    },
+    {
+      "id": "Q12",
+      "status": "PASS",
+      "elapsed_sec": 0.64,
+      "dimensions": {
+        "source_verified": true,
+        "graph_verified": true,
+        "scenario_verified": true,
+        "execution_verified": false,
+        "memory_persistence_verified": false,
+        "multi_agent_handoff_verified": false
+      },
+      "checks_passed": true,
+      "failed_checks": [],
+      "answer_preview": "## Direct Answer\n- **total pager calls**: **4 calls** (3 calls during initial exhaustion failure + 1 call upon recovered delivery) [`orbitops/worker.py:10`].\n- **attempt reset**: **Reset to 0** (`alert.attempts = 0` explicitly executed in `orbitops/reopen.py:16` when `retry_failed_alert()` is called"
+    },
+    {
+      "id": "Q13",
+      "status": "PASS",
+      "elapsed_sec": 0.83,
+      "dimensions": {
+        "source_verified": true,
+        "graph_verified": true,
+        "scenario_verified": true,
+        "execution_verified": false,
+        "memory_persistence_verified": false,
+        "multi_agent_handoff_verified": false
+      },
+      "checks_passed": true,
+      "failed_checks": [],
+      "answer_preview": "## Direct Answer\n- **Can a failed reopen consume the reopen budget even without enqueue?**: **YES**.\n- **Ordering explanation**:\n  - In `orbitops/reopen.py:reopen_failed()`, line 13 executes `REOPENED[alert_id] = used + 1` **BEFORE** `hold(alert)` is evaluated at line 14.\n  - If `hold(alert)` return"
+    },
+    {
+      "id": "Q16",
+      "status": "PASS",
+      "elapsed_sec": 0.62,
+      "dimensions": {
+        "source_verified": true,
+        "graph_verified": true,
+        "scenario_verified": true,
+        "execution_verified": false,
+        "memory_persistence_verified": false,
+        "multi_agent_handoff_verified": false
+      },
+      "checks_passed": true,
+      "failed_checks": [],
+      "answer_preview": "## Direct Answer\n- **Tests that detect the regression (`MUTATION_CONFIRMED_DETECTOR`)**:\n  1. `tests/test_orbitops.py::test_exhausted_releases` [`tests/test_orbitops.py:35-42`]:\n     - Fails balance restoration assertion `self.assertEqual(BALANCE['core'], 4)` at line 40 because credit refund is neve"
+    },
+    {
+      "id": "Q21",
+      "status": "PASS",
+      "elapsed_sec": 0.6,
+      "dimensions": {
+        "source_verified": true,
+        "graph_verified": true,
+        "scenario_verified": true,
+        "execution_verified": false,
+        "memory_persistence_verified": false,
+        "multi_agent_handoff_verified": false
+      },
+      "checks_passed": true,
+      "failed_checks": [],
+      "answer_preview": "## Direct Answer\n- **Loss Window**: Exists between `PENDING.pop(0)` at line 7 and completion of `deliver(alert)` at line 11 in `orbitops/consumer.py` [`orbitops/consumer.py:7-11`].\n- **Actual Code Behavior**:\n  - `PENDING.pop(0)` is an immediate, destructive in-memory removal [`orbitops/consumer.py:"
+    },
+    {
+      "id": "Q27",
+      "status": "PASS",
+      "elapsed_sec": 0.63,
+      "dimensions": {
+        "source_verified": true,
+        "graph_verified": false,
+        "scenario_verified": true,
+        "execution_verified": false,
+        "memory_persistence_verified": true,
+        "multi_agent_handoff_verified": false
+      },
+      "checks_passed": true,
+      "failed_checks": [],
+      "answer_preview": "## Direct Answer\n- **Persistent Memory Action**: Verified persistence, cross-session retrieval, provenance, and active revision revalidation in live FalkorDB.\n- **10-Step Verification Trace**:\n  1. **Session A Investigation Created**: `session_id`: `session_a_6c0995`.\n  2. **Persisted to Live Falkor"
+    },
+    {
+      "id": "Q28",
+      "status": "PASS",
+      "elapsed_sec": 0.75,
+      "dimensions": {
+        "source_verified": true,
+        "graph_verified": true,
+        "scenario_verified": true,
+        "execution_verified": false,
+        "memory_persistence_verified": false,
+        "multi_agent_handoff_verified": true
+      },
+      "checks_passed": true,
+      "failed_checks": [],
+      "answer_preview": "## Direct Answer\n- **Multi-Agent Coordination**: Live collaborative investigation across 4 specialized agent identities coordinated through FalkorDB (`investigation_id`: `inv_4b8f6817`).\n- **Auditable Coordination Record**:\n  - **Four Distinct Agent Identities**:\n    1. `agent_graph_investigator_1` "
+    },
+    {
+      "id": "Q30",
+      "status": "PASS",
+      "elapsed_sec": 0.99,
+      "dimensions": {
+        "source_verified": true,
+        "graph_verified": true,
+        "scenario_verified": true,
+        "execution_verified": true,
+        "memory_persistence_verified": false,
+        "multi_agent_handoff_verified": false
+      },
+      "checks_passed": true,
+      "failed_checks": [],
+      "answer_preview": "## Direct Answer\n- **Diff Summary**: Removed `release(alert)` from while-loop exhaustion branch in `orbitops/worker.py:19`.\n- **Blast-Radius Graph**: `orbitops.worker.deliver` -> `orbitops.consumer.drain_one` -> `orbitops.api.run_agent_once` -> `orbitops.credits.BALANCE`, `orbitops.credits.HELD`.\n- "
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+MAX_SEND_RETRIES=2
+MAX_REOPEN=1
+VIP_TEAMS={"critical"}
+MUTED_SERVICES={"sandbox"}
