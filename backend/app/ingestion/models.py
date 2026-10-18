@@ -9,6 +9,8 @@ class ParsedSymbol:
     start_line: int
     end_line: int
     parent_name: Optional[str] = None
+    language: Optional[str] = None
+    docstring: Optional[str] = None
     properties: Dict[str, Any] = field(default_factory=dict)
 
 @dataclass

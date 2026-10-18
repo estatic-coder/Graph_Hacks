@@ -24,7 +24,7 @@ QUERY = (
 
 @pytest.fixture(scope="module")
 def ensure_sentinel_indexed():
-    """Ensures SentinelShop is indexed in FalkorDB if repo directory exists."""
+    """Ensures SentinelShop and sample_1 are indexed in FalkorDB if repo directory exists."""
     if os.path.isdir(SENTINEL_REPO_PATH):
         graph = falkor_client.get_graph(f"workspace_{SENTINEL_REPO_ID}")
         res = graph.query("MATCH (n:Function {name: 'authorize_payment'}) RETURN count(n) AS cnt")
@@ -33,6 +33,14 @@ def ensure_sentinel_indexed():
             from app.ingestion.pipeline import IngestionPipeline
             pipeline = IngestionPipeline(repo_path=SENTINEL_REPO_PATH, repo_id=SENTINEL_REPO_ID)
             pipeline.index()
+    if os.path.isdir(SAMPLE_REPO_PATH):
+        graph_sample = falkor_client.get_graph("workspace_sample_1")
+        res_sample = graph_sample.query("MATCH (n) RETURN count(n) AS cnt")
+        cnt_sample = res_sample.result_set[0][0] if res_sample.result_set else 0
+        if cnt_sample == 0:
+            from app.ingestion.pipeline import IngestionPipeline
+            pipeline_sample = IngestionPipeline(repo_path=SAMPLE_REPO_PATH, repo_id="sample_1")
+            pipeline_sample.index()
     return SENTINEL_REPO_ID
 
 

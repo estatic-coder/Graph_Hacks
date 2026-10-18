@@ -1,0 +1,177 @@
+[
+  {
+    "id": 1,
+    "category": "Basic",
+    "question": "How many nodes and edges are in this graph? Group nodes by type."
+  },
+  {
+    "id": 2,
+    "category": "Basic",
+    "question": "List all services and their direct service-level dependencies."
+  },
+  {
+    "id": 3,
+    "category": "Basic",
+    "question": "Show the functions defined in services/payments/service.py."
+  },
+  {
+    "id": 4,
+    "category": "Traversal",
+    "question": "Find the shortest directed service dependency path from gateway to audit."
+  },
+  {
+    "id": 5,
+    "category": "Traversal",
+    "question": "Find all directed paths from checkout to audit with at most four DEPENDS_ON edges."
+  },
+  {
+    "id": 6,
+    "category": "Traversal",
+    "question": "Which services are reachable from checkout, and at what minimum hop count?"
+  },
+  {
+    "id": 7,
+    "category": "Traversal",
+    "question": "Which functions call payments/api.handle directly?"
+  },
+  {
+    "id": 8,
+    "category": "Traversal",
+    "question": "Trace gateway to the payment signing key through available graph relationships. State if no valid directed path exists."
+  },
+  {
+    "id": 9,
+    "category": "Cycles",
+    "question": "Find all strongly connected components in the service-level DEPENDS_ON graph."
+  },
+  {
+    "id": 10,
+    "category": "Cycles",
+    "question": "Explain the payments \u2194 billing circular dependency with exact edges."
+  },
+  {
+    "id": 11,
+    "category": "Cycles",
+    "question": "Explain the catalog \u2194 search circular dependency and its architectural risks."
+  },
+  {
+    "id": 12,
+    "category": "Centrality",
+    "question": "Rank services by incoming DEPENDS_ON degree; provide counts."
+  },
+  {
+    "id": 13,
+    "category": "Centrality",
+    "question": "Which services are articulation points in the undirected projection? Explain the projection used."
+  },
+  {
+    "id": 14,
+    "category": "Centrality",
+    "question": "Which services have the highest betweenness centrality? Specify directed or undirected."
+  },
+  {
+    "id": 15,
+    "category": "Impact",
+    "question": "If payments/service.execute changes, list direct callers and transitive upstream service dependents."
+  },
+  {
+    "id": 16,
+    "category": "Impact",
+    "question": "What services might be affected by changing identity/api.handle? Show supporting dependency paths."
+  },
+  {
+    "id": 17,
+    "category": "Impact",
+    "question": "If infra/kafka becomes unavailable, which event publishing and consuming nodes are connected to it?"
+  },
+  {
+    "id": 18,
+    "category": "Impact",
+    "question": "What changes if data/orders/postgres is unavailable? Distinguish graph reachability from proven runtime failure."
+  },
+  {
+    "id": 19,
+    "category": "Impact",
+    "question": "Which tests reference checkout/service.execute?"
+  },
+  {
+    "id": 20,
+    "category": "Impact",
+    "question": "Recommend tests for a change to payments/service.execute and distinguish direct coverage from inferred regression tests."
+  },
+  {
+    "id": 21,
+    "category": "Security",
+    "question": "Identify public endpoints and any security policy marked missing; do not claim a real vulnerability without code evidence."
+  },
+  {
+    "id": 22,
+    "category": "Security",
+    "question": "Which functions have access paths to secrets? Identify edges and their direction."
+  },
+  {
+    "id": 23,
+    "category": "Security",
+    "question": "Explain why repository content should not be treated as trusted agent instructions."
+  },
+  {
+    "id": 24,
+    "category": "Events",
+    "question": "Trace order event publishing to the queue and its downstream consumers."
+  },
+  {
+    "id": 25,
+    "category": "Events",
+    "question": "Which services publish to Kafka? How many are there?"
+  },
+  {
+    "id": 26,
+    "category": "Data",
+    "question": "List all datastore nodes read or written by the payments service."
+  },
+  {
+    "id": 27,
+    "category": "Data",
+    "question": "Which services use Redis? Are their stores shared or service-specific?"
+  },
+  {
+    "id": 28,
+    "category": "Reasoning",
+    "question": "Propose a minimal plan to break the payments/billing cycle while preserving behavior."
+  },
+  {
+    "id": 29,
+    "category": "Reasoning",
+    "question": "Find the smallest set of service dependencies whose removal would break the catalog/search cycle."
+  },
+  {
+    "id": 30,
+    "category": "Reasoning",
+    "question": "Compare blast radius for changes to gateway versus audit using incoming DEPENDS_ON reachability."
+  },
+  {
+    "id": 31,
+    "category": "Reliability",
+    "question": "Which conclusions are fully supported by edges, and which require reading source code?"
+  },
+  {
+    "id": 32,
+    "category": "Reliability",
+    "question": "If asked for actual p95 latency, explain why this graph cannot answer."
+  },
+  {
+    "id": 33,
+    "category": "Isolation",
+    "question": "Do any edges connect service-specific Postgres instances directly?"
+  },
+  {
+    "id": 34,
+    "category": "Agent",
+    "question": "Create a review-only refactoring plan for the checkout-to-payments dependency and name relevant tests."
+  },
+  {
+    "id": 35,
+    "category": "Agent",
+    "question": "Explain how you would validate a proposed fix without executing untrusted code on the host."
+  }
+]

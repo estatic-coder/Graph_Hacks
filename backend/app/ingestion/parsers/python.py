@@ -117,6 +117,39 @@ class PythonASTVisitor(ast.NodeVisitor):
                         end_line=node.end_lineno or node.lineno
                     ))
 
+                    if var_name == "DEPENDENCIES" and isinstance(node.value, ast.Dict):
+                        for k, v in zip(node.value.keys, node.value.values):
+                            k_name = k.value if isinstance(k, ast.Constant) and isinstance(k.value, str) else None
+                            if not k_name:
+                                continue
+                            self.symbols.append(ParsedSymbol(
+                                type=NodeType.MODULE,
+                                name=k_name,
+                                start_line=node.lineno,
+                                end_line=node.end_lineno or node.lineno
+                            ))
+                            deps = []
+                            if isinstance(v, (ast.Tuple, ast.List)):
+                                for elt in v.elts:
+                                    if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
+                                        deps.append(elt.value)
+                            for dep in deps:
+                                self.symbols.append(ParsedSymbol(
+                                    type=NodeType.MODULE,
+                                    name=dep,
+                                    start_line=node.lineno,
+                                    end_line=node.end_lineno or node.lineno
+                                ))
+                                self.relationships.append(ParsedRelationship(
+                                    source_name=k_name,
+                                    target_name=dep,
+                                    type=RelType.DEPENDS_ON,
+                                    confidence=1.0,
+                                    is_inferred=False,
+                                    provenance=f"Line {node.lineno}",
+                                    properties={"dependency_type": "service"}
+                                ))
+
         # Check for state transitions inside functions, e.g. job.status = "review"
         if self.scope_stack:
             for tgt in node.targets:
@@ -157,6 +190,9 @@ class PythonASTVisitor(ast.NodeVisitor):
 
     def visit_Import(self, node: ast.Import):
         for alias in node.names:
+            props = {}
+            if alias.asname:
+                props["asname"] = alias.asname
             self.relationships.append(ParsedRelationship(
                 source_name=self.current_scope,
                 target_name=alias.name,
@@ -165,12 +201,16 @@ class PythonASTVisitor(ast.NodeVisitor):
                 is_inferred=False,
                 provenance=f"Line {node.lineno}",
                 target_module=alias.name,
-                level=0
+                level=0,
+                properties=props
             ))
 
     def visit_ImportFrom(self, node: ast.ImportFrom):
         mod = node.module or ""
         for alias in node.names:
+            props = {}
+            if alias.asname:
+                props["asname"] = alias.asname
             self.relationships.append(ParsedRelationship(
                 source_name=self.current_scope,
                 target_name=alias.name,
@@ -179,7 +219,8 @@ class PythonASTVisitor(ast.NodeVisitor):
                 is_inferred=False,
                 provenance=f"Line {node.lineno}",
                 target_module=mod,
-                level=node.level or 0
+                level=node.level or 0,
+                properties=props
             ))
 
     def visit_Call(self, node: ast.Call):
@@ -197,13 +238,17 @@ class PythonASTVisitor(ast.NodeVisitor):
 
         if target_name:
             # Default direct static call
+            call_props = {}
+            if obj_name:
+                call_props["receiver"] = obj_name
             self.relationships.append(ParsedRelationship(
                 source_name=self.current_scope,
                 target_name=target_name,
                 type=RelType.CALLS,
                 confidence=1.0,
                 is_inferred=False,
-                provenance=f"Line {node.lineno}"
+                provenance=f"Line {node.lineno}",
+                properties=call_props
             ))
 
             # Typed queue and state operations

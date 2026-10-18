@@ -147,7 +147,17 @@ class ReasoningPipeline:
             """
             res = falkor_client.safe_query(self.graph_name, cypher, {"repo_id": self.repo_id})
             rows = getattr(res, "result_set", res) or []
-            return bool(rows and int(rows[0][0]) > 0)
+            if rows and int(rows[0][0]) > 0:
+                return True
+            # If using in-memory mock client and repository metadata exists with status 'ready', auto-index
+            if hasattr(falkor_client, "graphs") and self.repo_path and os.path.exists(self.repo_path):
+                from app.repositories.manager import RepositoryManager
+                meta = RepositoryManager().get_repository(self.repo_id)
+                if meta and meta.status == "ready":
+                    from app.ingestion.pipeline import IngestionPipeline
+                    IngestionPipeline(self.repo_path, self.repo_id).index()
+                    return True
+            return False
         except Exception as e:
             logger.error(f"Error checking graph status for repo {self.repo_id}: {e}")
             return False

@@ -30,6 +30,10 @@ class IntentClassifier:
     and extracts candidate symbols, natural-language entity phrases, path endpoints,
     and multi-label operational capabilities.
     """
+    def __init__(self, repo_id: Optional[str] = None, repo_path: Optional[str] = None):
+        self.repo_id = repo_id
+        self.repo_path = repo_path
+
     def classify(self, query: str, context_node: Optional[dict] = None) -> IntentResult:
         q_lower = query.lower()
         candidates, phrases = self._extract_entities_and_phrases(query)
@@ -265,7 +269,15 @@ class IntentClassifier:
         if has_state_effect_query:
             detected_capabilities.append("STATE_EFFECT_QUERY")
 
-        # 12. STATIC_PATH_ANALYSIS
+        # 12. STATIC_PATH_ANALYSIS & SHORTEST_PATH
+        has_shortest_path = any(k in q_lower for k in [
+            "shortest directed call path", "shortest directed path", "shortest call path",
+            "shortest path", "shortest paths", "minimum-hop", "minimum hop",
+            "show each hop", "shortest hops"
+        ]) or (bool(path_endpoints) and "shortest" in q_lower)
+        if has_shortest_path:
+            detected_capabilities.append("SHORTEST_PATH")
+
         has_static_path = bool(path_endpoints) or any(k in q_lower for k in [
             "static call path", "static calls path", "static calls paths", "static call paths",
             "enumerate static calls paths", "enumerate static call paths", "calls paths from",
@@ -276,6 +288,35 @@ class IntentClassifier:
         ])
         if has_static_path:
             detected_capabilities.append("STATIC_PATH_ANALYSIS")
+
+        # 13. STRONGLY_CONNECTED_COMPONENTS
+        has_scc = any(k in q_lower for k in [
+            "strongly connected components", "strongly connected component", "scc", "sccs",
+            "circular dependencies", "circular dependency", "circular rollout dependency",
+            "dependency cycle", "cycles in the service graph", "service dependency cycle",
+            "condensation graph", "detect cycles", "cycle condensation"
+        ])
+        if has_scc:
+            detected_capabilities.append("STRONGLY_CONNECTED_COMPONENTS")
+
+        # 14. DEGREE_RANKING & Centrality
+        has_degree_ranking = any(k in q_lower for k in [
+            "inbound calls degree", "inbound call degree", "outbound calls degree", "outbound call degree",
+            "top 20 functions", "top functions by inbound", "rank the top 20", "highest in-degree", "highest out-degree",
+            "degree ranking", "rank by inbound", "rank by outbound", "in-degree", "out-degree",
+            "degree centrality", "rank the top"
+        ]) or (any(k in q_lower for k in ["rank", "ranking", "top "]) and any(k in q_lower for k in ["degree", "calls", "inbound"]))
+        if has_degree_ranking:
+            detected_capabilities.append("DEGREE_RANKING")
+
+        # 15. DEPENDENCY_TRAVERSAL
+        has_dependency_traversal = any(k in q_lower for k in [
+            "depend transitively on", "depend transitively", "transitive dependencies",
+            "transitive dependency", "distinguish imports from calls", "downstream dependencies",
+            "upstream dependencies", "dependencies of payments", "transitive reachability"
+        ]) or (any(k in q_lower for k in ["depend", "depends", "dependencies"]) and any(k in q_lower for k in ["transitive", "transitively", "imports from calls"]))
+        if has_dependency_traversal:
+            detected_capabilities.append("DEPENDENCY_TRAVERSAL")
 
         # Negative evidence search
         is_negative_evidence = any(k in q_lower for k in [
@@ -314,6 +355,26 @@ class IntentClassifier:
             primary_intent = "GRAPH_GUIDED_TEST_EXECUTION"
             confidence = 0.99
             description = "Producing diff blast radius, selecting tests, and executing in isolated sandbox."
+        elif has_scc:
+            primary_intent = "STRONGLY_CONNECTED_COMPONENTS"
+            confidence = 0.99
+            description = "Identifying strongly connected components and circular dependencies using Tarjan's algorithm."
+        elif has_shortest_path:
+            primary_intent = "SHORTEST_PATH"
+            confidence = 0.99
+            description = "Discovering minimum-hop directed call graph path using directed BFS."
+        elif has_degree_ranking:
+            primary_intent = "DEGREE_RANKING"
+            confidence = 0.99
+            description = "Ranking functions and components by exact inbound or outbound graph degree."
+        elif has_dependency_traversal:
+            primary_intent = "DEPENDENCY_TRAVERSAL"
+            confidence = 0.98
+            description = "Traversing direct and transitive dependencies distinguishing imports from calls."
+        elif has_change_impact:
+            primary_intent = "CHANGE_IMPACT_ANALYSIS"
+            confidence = 0.95
+            description = "Analyzing change impact, affected components, and downstream ripple effects."
         elif has_test_assertion_analysis:
             primary_intent = "TEST_ASSERTION_ANALYSIS"
             confidence = 0.95
@@ -334,10 +395,6 @@ class IntentClassifier:
             primary_intent = "CONFIGURATION_IMPACT"
             confidence = 0.95
             description = "Analyzing impact of numeric or system configuration changes."
-        elif has_change_impact:
-            primary_intent = "CHANGE_IMPACT_ANALYSIS"
-            confidence = 0.95
-            description = "Analyzing change impact, affected components, and downstream ripple effects."
         elif has_multiphase_scenario:
             primary_intent = "MULTIPHASE_SCENARIO"
             confidence = 0.95
@@ -462,6 +519,21 @@ class IntentClassifier:
             if t and t not in candidates and not t.isdigit():
                 candidates.append(t)
                 phrases.append(t)
+
+        # 1B. Repository-relative file paths: services/payments/service.py
+        repo_paths = re.findall(r"(?:[a-zA-Z0-9_.-]+/)+[a-zA-Z0-9_.-]+\.(?:py|ts|js|json|sql|yaml|yml|md)", query, re.IGNORECASE)
+        for rp in repo_paths:
+            if rp not in candidates:
+                candidates.append(rp)
+                phrases.append(rp)
+
+        # 1C. Dotted module paths: services.inventory.repository
+        dotted = re.findall(r"\b[a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)+\b", query)
+        for dp in dotted:
+            if not dp.endswith((".py", ".ts", ".js", ".json", ".sql", ".md")) and not any(part.isdigit() for part in dp.split(".")):
+                if dp not in candidates and dp.lower() not in stopwords:
+                    candidates.append(dp)
+                    phrases.append(dp)
 
         # 2. Filenames with extensions (e.g. main.py, db.py, config.json)
         files = re.findall(r"\b[\w-]+\.(?:py|ts|js|json|sql|yaml|yml|md)\b", query, re.IGNORECASE)

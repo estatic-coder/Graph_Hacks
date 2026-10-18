@@ -404,3 +404,116 @@ def invalidate_stale_memory(request: InvalidateMemoryRequest):
         "invalidated_findings": invalidated
     }
 
+# ==========================================
+# Hybrid Retrieval Endpoints (ASTERION V3)
+# ==========================================
+
+class RetrieveRequest(BaseModel):
+    repo_id: str
+    query: str
+    limit: Optional[int] = 10
+    max_tokens: Optional[int] = 4000
+    alpha: Optional[float] = 0.6
+    expand_graph: Optional[bool] = True
+
+@app.get("/api/retrieve")
+def retrieve_context_get(
+    repo_id: str,
+    query: str,
+    limit: int = 10,
+    max_tokens: int = 4000,
+    alpha: float = 0.6,
+    expand_graph: bool = True
+):
+    from app.repositories.manager import RepositoryManager
+    from app.services.retrieval import HybridRetriever
+    repo = RepositoryManager().get_repository(repo_id)
+    repo_path = repo.path if repo else None
+    retriever = HybridRetriever(repo_id=repo_id, repo_path=repo_path)
+    result = retriever.retrieve(
+        query=query,
+        limit=limit,
+        max_tokens=max_tokens,
+        alpha=alpha,
+        expand_graph=expand_graph
+    )
+    return {"status": "success", "data": result}
+
+@app.post("/api/retrieve")
+def retrieve_context_post(request: RetrieveRequest):
+    from app.repositories.manager import RepositoryManager
+    from app.services.retrieval import HybridRetriever
+    repo = RepositoryManager().get_repository(request.repo_id)
+    repo_path = repo.path if repo else None
+    retriever = HybridRetriever(repo_id=request.repo_id, repo_path=repo_path)
+    result = retriever.retrieve(
+        query=request.query,
+        limit=request.limit or 10,
+        max_tokens=request.max_tokens or 4000,
+        alpha=request.alpha if request.alpha is not None else 0.6,
+        expand_graph=request.expand_graph if request.expand_graph is not None else True
+    )
+    return {"status": "success", "data": result}
+
+
+# ==========================================
+# Human-in-the-Loop Approval Endpoints (ASTERION V3)
+# ==========================================
+
+class CreateApprovalRequest(BaseModel):
+    action_type: str
+    description: str
+    risk_level: Optional[str] = "LOW"
+    payload: Optional[dict] = None
+
+class ResolveApprovalRequest(BaseModel):
+    reviewer: Optional[str] = "admin"
+    notes: Optional[str] = None
+
+@app.get("/api/approvals")
+def list_approvals(status: Optional[str] = None):
+    from app.agents.approval import default_approval_gate, ApprovalStatus
+    reqs = list(default_approval_gate.requests.values())
+    if status:
+        reqs = [r for r in reqs if r.status.value.upper() == status.upper()]
+    return {
+        "status": "success",
+        "requests": [r.model_dump() for r in reqs]
+    }
+
+@app.post("/api/approvals/request")
+def create_approval_request(request: CreateApprovalRequest):
+    from app.agents.approval import default_approval_gate, RiskLevel
+    risk = RiskLevel(request.risk_level.upper()) if request.risk_level and request.risk_level.upper() in RiskLevel.__members__ else RiskLevel.LOW
+    req = default_approval_gate.request_approval(
+        action_type=request.action_type,
+        description=request.description,
+        risk_level=risk,
+        payload=request.payload or {}
+    )
+    return {"status": "success", "request": req.model_dump()}
+
+@app.post("/api/approvals/{action_id}/approve")
+def approve_action(action_id: str, request: Optional[ResolveApprovalRequest] = None):
+    from app.agents.approval import default_approval_gate
+    try:
+        reviewer = request.reviewer if request and request.reviewer else "admin"
+        notes = request.notes if request and request.notes else "Authorized via API"
+        req = default_approval_gate.approve(action_id=action_id, reviewer=reviewer, notes=notes)
+        return {"status": "success", "request": req.model_dump()}
+    except KeyError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@app.post("/api/approvals/{action_id}/reject")
+def reject_action(action_id: str, request: Optional[ResolveApprovalRequest] = None):
+    from app.agents.approval import default_approval_gate
+    try:
+        reviewer = request.reviewer if request and request.reviewer else "admin"
+        reason = request.notes if request and request.notes else "Rejected via API"
+        req = default_approval_gate.reject(action_id=action_id, reviewer=reviewer, reason=reason)
+        return {"status": "success", "request": req.model_dump()}
+    except KeyError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+

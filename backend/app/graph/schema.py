@@ -10,6 +10,8 @@ class NodeType(str, Enum):
     FILE = "File"
     MODULE = "Module"
     CLASS = "Class"
+    INTERFACE = "Interface"
+    ENUM = "Enum"
     FUNCTION = "Function"
     METHOD = "Method"
     CALLSITE = "CallSite"

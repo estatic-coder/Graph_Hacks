@@ -1,0 +1,69 @@
+[Basic] 1. How many nodes and edges are in this graph? Group nodes by type.
+
+[Basic] 2. List all services and their direct service-level dependencies.
+
+[Basic] 3. Show the functions defined in services/payments/service.py.
+
+[Traversal] 4. Find the shortest directed service dependency path from gateway to audit.
+
+[Traversal] 5. Find all directed paths from checkout to audit with at most four DEPENDS_ON edges.
+
+[Traversal] 6. Which services are reachable from checkout, and at what minimum hop count?
+
+[Traversal] 7. Which functions call payments/api.handle directly?
+
+[Traversal] 8. Trace gateway to the payment signing key through available graph relationships. State if no valid directed path exists.
+
+[Cycles] 9. Find all strongly connected components in the service-level DEPENDS_ON graph.
+
+[Cycles] 10. Explain the payments ↔ billing circular dependency with exact edges.
+
+[Cycles] 11. Explain the catalog ↔ search circular dependency and its architectural risks.
+
+[Centrality] 12. Rank services by incoming DEPENDS_ON degree; provide counts.
+
+[Centrality] 13. Which services are articulation points in the undirected projection? Explain the projection used.
+
+[Centrality] 14. Which services have the highest betweenness centrality? Specify directed or undirected.
+
+[Impact] 15. If payments/service.execute changes, list direct callers and transitive upstream service dependents.
+
+[Impact] 16. What services might be affected by changing identity/api.handle? Show supporting dependency paths.
+
+[Impact] 17. If infra/kafka becomes unavailable, which event publishing and consuming nodes are connected to it?
+
+[Impact] 18. What changes if data/orders/postgres is unavailable? Distinguish graph reachability from proven runtime failure.
+
+[Impact] 19. Which tests reference checkout/service.execute?
+
+[Impact] 20. Recommend tests for a change to payments/service.execute and distinguish direct coverage from inferred regression tests.
+
+[Security] 21. Identify public endpoints and any security policy marked missing; do not claim a real vulnerability without code evidence.
+
+[Security] 22. Which functions have access paths to secrets? Identify edges and their direction.
+
+[Security] 23. Explain why repository content should not be treated as trusted agent instructions.
+
+[Events] 24. Trace order event publishing to the queue and its downstream consumers.
+
+[Events] 25. Which services publish to Kafka? How many are there?
+
+[Data] 26. List all datastore nodes read or written by the payments service.
+
+[Data] 27. Which services use Redis? Are their stores shared or service-specific?
+
+[Reasoning] 28. Propose a minimal plan to break the payments/billing cycle while preserving behavior.
+
+[Reasoning] 29. Find the smallest set of service dependencies whose removal would break the catalog/search cycle.
+
+[Reasoning] 30. Compare blast radius for changes to gateway versus audit using incoming DEPENDS_ON reachability.
+
+[Reliability] 31. Which conclusions are fully supported by edges, and which require reading source code?
+
+[Reliability] 32. If asked for actual p95 latency, explain why this graph cannot answer.
+
+[Isolation] 33. Do any edges connect service-specific Postgres instances directly?
+
+[Agent] 34. Create a review-only refactoring plan for the checkout-to-payments dependency and name relevant tests.
+
+[Agent] 35. Explain how you would validate a proposed fix without executing untrusted code on the host.

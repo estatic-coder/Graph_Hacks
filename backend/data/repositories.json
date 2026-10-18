@@ -94,18 +94,16 @@
     "source_path": "/home/zeraphynx/Projects/asterion/backend/data/repos/repo_aegisops_asterio_158e16/AegisOps",
     "source_url": null,
     "created_at": "2026-10-11T13:48:29.549492+00:00",
-    "last_indexed_at": "2026-10-11T13:48:46.133786+00:00",
+    "last_indexed_at": "2026-10-18T14:40:48.964261+00:00",
     "status": "ready",
     "error_message": null,
     "stats": {
       "files_scanned": 20,
-      "symbols_extracted": 51,
-      "relationships_created": 123,
-      "files_skipped": 0,
+      "symbols_extracted": 59,
+      "relationships_created": 124,
+      "files_skipped": 17,
       "parsing_errors": 0,
-      "duration_seconds": 15.28,
-      "nodes_count": 89,
-      "relationships_count": 200
+      "duration_seconds": 0.01
     },
     "is_demo": false
   },
@@ -260,6 +258,46 @@
       "duration_seconds": 0.38,
       "nodes_count": 139,
       "relationships_count": 418
+    },
+    "is_demo": false
+  },
+  "repo_asterion_complex_b99027": {
+    "id": "repo_asterion_complex_b99027",
+    "name": "asterion_complex_graph",
+    "source_type": "zip",
+    "source_path": "/home/zeraphynx/Projects/asterion/backend/data/repos/repo_asterion_complex_b99027",
+    "source_url": null,
+    "created_at": "2026-10-18T16:14:41.039849+00:00",
+    "last_indexed_at": "2026-10-18T16:14:41.046341+00:00",
+    "status": "ready",
+    "error_message": null,
+    "stats": {
+      "files_scanned": 3,
+      "symbols_extracted": 4,
+      "relationships_created": 0,
+      "files_skipped": 3,
+      "parsing_errors": 0,
+      "duration_seconds": 0.0
+    },
+    "is_demo": false
+  },
+  "repo_asterion_mega_re_2ab955": {
+    "id": "repo_asterion_mega_re_2ab955",
+    "name": "asterion_mega_repository",
+    "source_type": "zip",
+    "source_path": "/home/zeraphynx/Projects/asterion/backend/data/repos/repo_asterion_mega_re_2ab955/asterion_mega_repository",
+    "source_url": null,
+    "created_at": "2026-10-18T16:18:42.539176+00:00",
+    "last_indexed_at": "2026-10-18T16:18:43.545337+00:00",
+    "status": "ready",
+    "error_message": null,
+    "stats": {
+      "files_scanned": 339,
+      "symbols_extracted": 3796,
+      "relationships_created": 11688,
+      "files_skipped": 0,
+      "parsing_errors": 0,
+      "duration_seconds": 0.99
     },
     "is_demo": false
   }

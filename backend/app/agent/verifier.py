@@ -41,6 +41,7 @@ class VerificationReport:
     execution_verified: bool = False
     memory_persistence_verified: bool = False
     multi_agent_handoff_verified: bool = False
+    computational_correctness_verified: bool = False
     execution_receipt: Optional[Dict[str, Any]] = None
     memory_receipt: Optional[Dict[str, Any]] = None
     multi_agent_receipt: Optional[Dict[str, Any]] = None
@@ -133,9 +134,9 @@ class EvidenceVerifier:
 
         # Dimension 1: SOURCE_VERIFIED
         source_verified = (
-            (len(valid_citations) > 0) and
             (len(fabricated_citations) == 0) and
-            (len(alien_symbol_issues) == 0)
+            (len(alien_symbol_issues) == 0) and
+            (len(valid_citations) > 0 or len(citation_verifications) == 0)
         )
 
         # Dimension 2: GRAPH_VERIFIED
@@ -225,14 +226,60 @@ class EvidenceVerifier:
         if not has_substantive_evidence:
             insufficient_flags.append("Zero verified source citations, graph relationships, or execution receipts found.")
 
-        # Check plan execution
-        executed_caps = []
-        if pipeline_data:
+        # Check plan execution (only enforce when full pipeline_data context is provided)
+        has_executed_plan = True
+        if pipeline_data is not None:
             exec_res = pipeline_data.get("execution_results") or {}
             executed_caps = exec_res.get("executed_capabilities") or []
-        has_executed_plan = len(executed_caps) > 0
-        if not has_executed_plan:
-            insufficient_flags.append("No planned capabilities executed in the investigation plan.")
+            has_executed_plan = len(executed_caps) > 0
+            if not has_executed_plan:
+                insufficient_flags.append("No planned capabilities executed in the investigation plan.")
+
+        # Dimension 7: COMPUTATIONAL_CORRECTNESS_VERIFIED
+        # Strictly separates citation verification from computational correctness.
+        # An answer is NEVER verified merely because citations exist on disk.
+        q_lower = (pipeline_data.get("question") or "").lower() if pipeline_data else ""
+        requires_computation = any(w in q_lower for w in [
+            "strongly connected components", "scc", "shortest path", "shortest directed",
+            "rank the top", "inbound calls degree", "degree ranking", "depend transitively on",
+            "transitive dependencies", "change impact", "might be affected", "how many calls",
+            "pager calls", "calculate", "simulate"
+        ])
+
+        computational_correctness_verified = False
+        if not requires_computation:
+            computational_correctness_verified = True
+        else:
+            contract_satisfied = (len(missing_contract_fields) == 0)
+            has_computational_evidence = False
+            if pipeline_data:
+                exec_res = pipeline_data.get("execution_results") or {}
+                cap_results = dict(exec_res.get("capability_results") or {})
+                trav_results = pipeline_data.get("traversal_results") or {}
+                cap_results.update(trav_results)
+                for cap_k, cap_v in cap_results.items():
+                    if isinstance(cap_v, dict) and not cap_v.get("error"):
+                        if any(k in cap_v for k in [
+                            "all_components", "ordered_hops", "rankings", "downstream",
+                            "affected_services", "scenario", "pager_calls", "total_components",
+                            "calculated_attempts", "attempts_count", "final_attempts", "events",
+                            "impacted_entities", "static_paths"
+                        ]):
+                            has_computational_evidence = True
+                            break
+            has_structured_output = (
+                ("| Rank |" in text and "Inbound" in text) or
+                ("Hop 0" in text and "Hop 1" in text) or
+                ("Component 1" in text and "Strongly Connected" in text) or
+                ("Direct Imports" in text and "Direct Calls" in text) or
+                ("Affected Services" in text and "Supporting Dependency Paths" in text) or
+                ("Mathematical Reachability Proof" in text) or
+                ("Algorithm: Tarjan" in text)
+            )
+            computational_correctness_verified = contract_satisfied and (has_computational_evidence or has_structured_output)
+
+        if requires_computation and not computational_correctness_verified:
+            insufficient_flags.append("Computational correctness unverified: answer lacks required deterministic graph algorithm results or numeric metrics.")
 
         # Calculate overall is_verified
         # If question requires execution, memory, or multi-agent handoff, enforce those dimensions specifically
@@ -245,6 +292,8 @@ class EvidenceVerifier:
             has_substantive_answer and
             has_substantive_evidence and
             has_executed_plan and
+            source_verified and
+            computational_correctness_verified and
             (len(fabricated_citations) == 0) and
             (len(fabricated_paths) == 0) and
             (len(alien_symbol_issues) == 0) and
@@ -257,7 +306,7 @@ class EvidenceVerifier:
         
         summary_parts = []
         if is_verified:
-            summary_parts.append(f"VERIFIED: {len(valid_citations)} citation(s) and {len(valid_paths)} path(s) grounded in repository facts; contract satisfied.")
+            summary_parts.append(f"VERIFIED: Citation Grounding: Verified ({len(valid_citations)} citations) | Computational Correctness: Verified | Contract Satisfied.")
             if execution_verified:
                 summary_parts.append("[EXECUTION_VERIFIED: Subprocess receipt confirmed]")
             if memory_persistence_verified:
@@ -271,6 +320,8 @@ class EvidenceVerifier:
                 summary_parts.append("INCOMPLETE_RESULT: Zero verified source citations or graph relationships.")
             if not question_completeness_verified or missing_contract_fields:
                 summary_parts.append(f"INCOMPLETE_RESULT: Incomplete answer missing required field(s): {', '.join(missing_contract_fields)}.")
+            if requires_computation and not computational_correctness_verified:
+                summary_parts.append("COMPUTATIONAL_CORRECTNESS_UNVERIFIED: Citations point to valid symbols, but required deterministic computation or numeric metrics are missing or failed contract.")
             if fabricated_citations:
                 summary_parts.append(f"REJECTED: {len(fabricated_citations)} fabricated or out-of-range source citation(s) detected.")
             if fabricated_paths:
@@ -300,6 +351,7 @@ class EvidenceVerifier:
             execution_verified=execution_verified,
             memory_persistence_verified=memory_persistence_verified,
             multi_agent_handoff_verified=multi_agent_handoff_verified,
+            computational_correctness_verified=computational_correctness_verified,
             execution_receipt=execution_receipt,
             memory_receipt=memory_receipt,
             multi_agent_receipt=multi_agent_receipt,

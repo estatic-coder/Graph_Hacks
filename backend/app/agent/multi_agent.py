@@ -200,6 +200,11 @@ class MultiAgentInvestigation:
             }
             self.tasks[task_id] = task
 
+        # Enforce in-memory lease concurrency control
+        if task.get("claimed_by") and task.get("claimed_by") != agent_id:
+            if now < task.get("lease_expires", 0.0):
+                return False
+
         task["status"] = TaskStatus.IN_PROGRESS.value
         task["claimed_by"] = agent_id
         task["claim_timestamp"] = now

@@ -435,24 +435,49 @@ class GraphMemoryManager:
             res = falkor_client.safe_query(self.graph_name, cypher, params)
             rows = getattr(res, "result_set", res) or []
             for r in rows:
-                finding = Finding(
-                    id=str(r[0]),
-                    finding_id=str(r[1]),
-                    session_id=str(r[2]),
-                    repo_id=str(r[3]),
-                    workspace_id=str(r[4]),
-                    title=str(r[5]),
-                    claim=str(r[6]),
-                    source_revision=str(r[7]),
-                    source_path=str(r[8]) if r[8] else None,
-                    start_line=int(r[9]) if r[9] is not None else None,
-                    end_line=int(r[10]) if r[10] is not None else None,
-                    is_verified=bool(r[11]),
-                    is_stale=bool(r[12]),
-                    stale_reason=str(r[13]) if r[13] else None,
-                    confidence=float(r[14]) if r[14] is not None else 1.0,
-                    created_at=str(r[15])
-                )
+                if isinstance(r, (list, tuple)) and len(r) >= 16:
+                    finding = Finding(
+                        id=str(r[0]),
+                        finding_id=str(r[1]),
+                        session_id=str(r[2]),
+                        repo_id=str(r[3]),
+                        workspace_id=str(r[4]),
+                        title=str(r[5]),
+                        claim=str(r[6]),
+                        source_revision=str(r[7]),
+                        source_path=str(r[8]) if r[8] else None,
+                        start_line=int(r[9]) if r[9] is not None else None,
+                        end_line=int(r[10]) if r[10] is not None else None,
+                        is_verified=bool(r[11]),
+                        is_stale=bool(r[12]),
+                        stale_reason=str(r[13]) if r[13] else None,
+                        confidence=float(r[14]) if r[14] is not None else 1.0,
+                        created_at=str(r[15])
+                    )
+                elif isinstance(r, (list, tuple)) and len(r) == 1 and hasattr(r[0], "properties"):
+                    p = r[0].properties
+                    finding = Finding(
+                        id=str(p.get("id", "")),
+                        finding_id=str(p.get("finding_id", p.get("id", ""))),
+                        session_id=str(p.get("session_id", "")),
+                        repo_id=str(p.get("repository_id", p.get("repo_id", ""))),
+                        workspace_id=str(p.get("workspace_id", "")),
+                        title=str(p.get("title", "")),
+                        claim=str(p.get("claim", "")),
+                        source_revision=str(p.get("source_revision", "")),
+                        source_path=str(p.get("source_path", "")) if p.get("source_path") else None,
+                        start_line=int(p.get("start_line", 1)) if p.get("start_line") is not None else None,
+                        end_line=int(p.get("end_line", 1)) if p.get("end_line") is not None else None,
+                        is_verified=bool(p.get("is_verified", False)),
+                        is_stale=bool(p.get("is_stale", False)),
+                        stale_reason=str(p.get("stale_reason", "")) if p.get("stale_reason") else None,
+                        confidence=float(p.get("confidence", 1.0)) if p.get("confidence") is not None else 1.0,
+                        created_at=str(p.get("created_at", ""))
+                    )
+                else:
+                    continue
+                if not include_stale and finding.is_stale:
+                    continue
                 # If query_text is given and no specific symbol_id, filter by keyword / token overlap
                 if query_text and not symbol_id:
                     q_lower = query_text.lower()
@@ -712,9 +737,17 @@ class GraphMemoryManager:
                 title = str(r[1])
                 f_rev = str(r[2]) if r[2] else ""
                 src_path = str(r[3]) if r[3] else None
-                s_line = int(r[4]) if r[4] is not None else None
-                e_line = int(r[5]) if r[5] is not None else None
-                old_hash = str(r[6]) if r[6] else ""
+                s_line = None
+                try:
+                    s_line = int(r[4]) if r[4] is not None and str(r[4]).isdigit() else None
+                except (ValueError, TypeError):
+                    s_line = None
+                e_line = None
+                try:
+                    e_line = int(r[5]) if r[5] is not None and str(r[5]).isdigit() else None
+                except (ValueError, TypeError):
+                    e_line = None
+                old_hash = str(r[6]) if len(r) > 6 and r[6] else ""
 
                 stale_reason = None
 

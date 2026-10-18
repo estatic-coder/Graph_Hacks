@@ -101,7 +101,7 @@ class TypedGraphTools:
             for r in rows:
                 caller_id = str(r[0])
                 depth = int(r[5])
-                path_names = list(r[7]) if len(r) > 7 and r[7] else []
+                path_names = list(r[7]) if len(r) > 7 and r[7] else (list(r[6]) if len(r) > 6 and isinstance(r[6], (list, tuple)) else [])
                 path_str = " -> ".join(path_names)
                 if path_str and path_str not in paths:
                     paths.append(path_str)

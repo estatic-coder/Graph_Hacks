@@ -1,7 +1,8 @@
 import os
 import re
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Set, Tuple
+from collections import defaultdict
 from dataclasses import dataclass, field
 from app.graph.client import falkor_client
 
@@ -340,13 +341,100 @@ class EntityResolver:
         module_constants = self._fetch_module_constants()
         all_symbols = cached_symbols + [c for c in module_constants if c["id"] not in {s["id"] for s in cached_symbols}]
 
-        for term in candidate_terms:
+        # Prioritize exact repository-relative paths and dotted modules over generic basenames
+        def _term_priority(t: str) -> int:
+            t_s = t.strip()
+            if "/" in t_s:
+                return 0  # Highest priority: exact repository path like services/payments/service.py
+            if "." in t_s and not t_s.endswith(".py"):
+                return 1  # Dotted module path like services.inventory.repository
+            if t_s.endswith((".py", ".ts", ".js")):
+                return 2  # Filename with extension
+            return 3      # Bare identifier or concept
+
+        sorted_candidates = sorted(candidate_terms, key=_term_priority)
+        exact_resolved_files: Set[str] = set()
+        exact_resolved_basenames: Set[str] = set()
+
+        for term in sorted_candidates:
             term_clean = term.strip()
             if not term_clean or len(term_clean) < 2:
                 continue
 
             # Stage 2 requirement: Do not treat numeric literals as graph entities
             if term_clean.isdigit() or re.match(r"^[-+]?\d+(\.\d+)?$", term_clean):
+                continue
+
+            # Check if this term is a basename of an already exact-resolved path (e.g. service.py when services/payments/service.py was resolved)
+            if term_clean in exact_resolved_basenames or f"{term_clean}.py" in exact_resolved_basenames or f"{term_clean.lower()}.py" in exact_resolved_basenames:
+                logger.info(f"Skipping basename candidate '{term_clean}' because exact path was already resolved in {exact_resolved_files}")
+                continue
+
+            # Check for exact repository-relative path match (e.g. services/payments/service.py or services.inventory.repository)
+            exact_path_candidates = [term_clean]
+            if "/" not in term_clean and "." in term_clean:
+                exact_path_candidates.append(term_clean.replace(".", "/") + ".py")
+                exact_path_candidates.append(term_clean.replace(".", "/"))
+
+            matched_file_syms = []
+            for epc in exact_path_candidates:
+                epc_norm = os.path.normpath(epc).lower()
+                for sym in all_symbols:
+                    s_path = sym.get("source_path")
+                    if not s_path:
+                        continue
+                    s_norm = os.path.normpath(s_path).lower()
+                    if s_norm == epc_norm or s_norm.endswith("/" + epc_norm) or s_norm == f"{epc_norm}.py":
+                        matched_file_syms.append(sym)
+                if matched_file_syms:
+                    break
+
+            if matched_file_syms:
+                # Group by exact source_path to find best file match
+                path_counts: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+                for s in matched_file_syms:
+                    path_counts[s["source_path"]].append(s)
+
+                best_path = min(path_counts.keys(), key=len)
+                exact_resolved_files.add(best_path)
+                exact_resolved_basenames.add(os.path.basename(best_path))
+                exact_resolved_basenames.add(os.path.splitext(os.path.basename(best_path))[0])
+
+                # Resolve File entity and defined symbols within this exact file
+                file_id = f"file_{self.repo_id}_{best_path}"
+                if file_id not in seen_ids:
+                    seen_ids.add(file_id)
+                    resolved.append(ResolvedEntity(
+                        id=file_id,
+                        name=os.path.basename(best_path),
+                        type="File",
+                        source_path=best_path,
+                        start_line=1,
+                        end_line=1,
+                        confidence=1.0,
+                        origin=EntityOrigin.REPOSITORY,
+                        repository_id=self.repo_id,
+                        resolution_method="exact_path_match",
+                        evidence=f"Exact repository path match for `{best_path}`."
+                    ))
+
+                # Add contained top symbols for this specific file
+                for sym in path_counts[best_path][:10]:
+                    if sym["id"] not in seen_ids and sym["type"] in ("Function", "Method", "Class"):
+                        seen_ids.add(sym["id"])
+                        resolved.append(ResolvedEntity(
+                            id=sym["id"],
+                            name=sym["name"],
+                            type=sym["type"],
+                            source_path=sym["source_path"],
+                            start_line=sym["start_line"],
+                            end_line=sym["end_line"],
+                            confidence=0.99,
+                            origin=EntityOrigin.REPOSITORY,
+                            repository_id=self.repo_id,
+                            resolution_method="exact_path_contained_symbol",
+                            evidence=f"Symbol defined in exact matched path `{best_path}:{sym['start_line']}`."
+                        ))
                 continue
 
             # Check concept synonyms
@@ -407,9 +495,22 @@ class EntityResolver:
                     resolved.append(nlm)
 
             # If term matches a file/module name (e.g. "gateway" -> "gateway.py"), associate functions in that module
+            # BUT NEVER expand across multiple similarly named files across different services!
             if len(term_clean) >= 3 and not direct_matches and not nl_matches:
+                matching_syms = []
                 for sym in all_symbols:
-                    if sym["source_path"] and f"{term_clean.lower()}.py" in sym["source_path"].lower():
+                    s_path = sym.get("source_path") or ""
+                    if s_path and (
+                        s_path.lower().endswith(f"/{term_clean.lower()}.py") or
+                        s_path.lower() == f"{term_clean.lower()}.py" or
+                        (s_path.lower().endswith(f"/{term_clean.lower()}") and "." not in term_clean)
+                    ):
+                        matching_syms.append(sym)
+
+                distinct_files = {s["source_path"] for s in matching_syms}
+                # If ambiguous across more than 1 service (e.g. service.py in 24 services), do NOT expand into hundreds of symbols!
+                if len(distinct_files) == 1:
+                    for sym in matching_syms:
                         if sym["type"] in ("Function", "Method") and sym["id"] not in seen_ids:
                             seen_ids.add(sym["id"])
                             resolved.append(ResolvedEntity(
@@ -450,11 +551,12 @@ class EntityResolver:
                         evidence=f"Recognized domain concept '{term_clean}'."
                     ))
 
-        # Strict candidate ranking: REPOSITORY symbols strictly outrank agent memory/concepts
+        # Strict candidate ranking: exact path matches outrank everything, then repository symbols outrank concepts
         def _candidate_rank(e: ResolvedEntity):
+            is_exact = 3 if e.resolution_method in ("exact_path_match", "exact_path_contained_symbol") else 0
             is_repo = 2 if e.origin == EntityOrigin.REPOSITORY else 0
             has_source = 1 if (e.source_path and e.source_path != "None") else 0
-            return (is_repo, has_source, e.confidence)
+            return (is_exact, is_repo, has_source, e.confidence)
 
         resolved.sort(key=_candidate_rank, reverse=True)
         return resolved
@@ -729,6 +831,45 @@ class EntityResolver:
             is_ambiguous=ambiguous,
             ambiguous_candidates=ambiguous_names
         )]
+
+    def resolve_query_entities(self, query: str, context_node: Optional[dict] = None) -> List[Dict[str, Any]]:
+        """
+        Extracts candidate entity references from a query string, resolves them to graph entities,
+        prioritizing exact repository-relative paths over basenames, and returns entity dictionaries.
+        """
+        candidate_terms: List[str] = []
+
+        # 1. Quoted / backtick terms (e.g. `services/payments/service.py` or 'auth_handler')
+        for m in re.finditer(r"[`'\"]([^`'\"]+)[`'\"]", query):
+            q_term = m.group(1).strip()
+            if q_term and q_term not in candidate_terms:
+                candidate_terms.append(q_term)
+
+        # 2. Explicit paths with slashes (e.g. services/payments/service.py)
+        for m in re.finditer(r"([a-zA-Z0-9_\-\./]+/[a-zA-Z0-9_\-\.]+)", query):
+            p = m.group(1).strip(".,!?;:()[]{}'\"")
+            if p and p not in candidate_terms:
+                candidate_terms.append(p)
+
+        # 3. Dotted module paths (e.g. services.inventory.repository)
+        for m in re.finditer(r"\b([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)+)\b", query):
+            d_term = m.group(1).strip()
+            if d_term and d_term not in candidate_terms:
+                candidate_terms.append(d_term)
+
+        # 4. Standalone file names with known code extensions
+        for m in re.finditer(r"\b([a-zA-Z0-9_\-]+\.(?:py|ts|js|json|yaml|yml|md|sql))\b", query):
+            f_term = m.group(1).strip()
+            if f_term and f_term not in candidate_terms:
+                candidate_terms.append(f_term)
+
+        # Resolve candidates or fallback to full query
+        if candidate_terms:
+            resolved_objs = self.resolve(candidate_terms, context_node=context_node)
+        else:
+            resolved_objs = self.resolve([query], context_node=context_node)
+
+        return [e.to_dict() for e in resolved_objs]
 
 
 # Compatibility alias

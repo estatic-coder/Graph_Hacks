@@ -1,0 +1,8 @@
+from services.gateway.models import ServiceProcessor
+from services.gateway import validators
+
+def test_gateway_processor():
+    assert ServiceProcessor().process(2) == 3
+
+def test_gateway_validator_symbol():
+    assert callable(validators.validators_operation_0)

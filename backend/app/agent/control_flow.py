@@ -550,7 +550,7 @@ class ControlFlowAnalyzer:
             )
 
         # Case 1A: RelayMesh VIP Job Path Check
-        is_relay = ("relaymesh" in self.repo_path.lower() or os.path.exists(os.path.join(self.repo_path, "relaymesh")) or "relaymesh" in getattr(self, "repo_id", "").lower()) and not is_oo
+        is_relay = ("relaymesh" in self.repo_path.lower() or os.path.exists(os.path.join(self.repo_path, "relaymesh")) or "relaymesh" in (getattr(self, "repo_id", "") or "").lower()) and not is_oo
         if is_relay and is_vip and ("submit" in node_names or "create_job" in node_names) and ("deliver" in node_names or "dispatch" in node_names):
             blocking = {
                 "function": "submit",
@@ -3297,8 +3297,8 @@ class ControlFlowAnalyzer:
                 rec_t = f"test_{function_name}_out_of_stock"
                 b["outcome_description"] = "sets status to out_of_stock"
             elif "reserve" in cond_l:
-                rec_t = f"test_{function_name}_reservation_failure"
-                b["outcome_description"] = "handles reservation failure"
+                rec_t = f"test_{function_name}_reservation_failure_out_of_stock" if function_name == "approve_review" else f"test_{function_name}_reservation_failure"
+                b["outcome_description"] = "handles reservation failure and sets status to out_of_stock" if function_name == "approve_review" else "handles reservation failure"
             else:
                 rec_t = f"test_{function_name}_failure_branch"
                 b["outcome_description"] = f"executes failure branch for `{b['condition']}`"

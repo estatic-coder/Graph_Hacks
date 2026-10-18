@@ -21,7 +21,7 @@ from app.agent.tracer import RequestLifecycleTracer
 logger = logging.getLogger(__name__)
 
 class GraphInvestigator:
-    def __init__(self, repo_id: str, repo_path: Optional[str] = None, workspace_id: str = "default"):
+    def __init__(self, repo_id: str, repo_path: Optional[str] = None, workspace_id: str = "default", mock_mode: Optional[bool] = None):
         self.repo_id = repo_id
         self.workspace_id = workspace_id
         self.graph_name = f"workspace_{repo_id}"
@@ -52,7 +52,10 @@ class GraphInvestigator:
 
         # Gemini API client
         self.api_key = settings.gemini_api_key or os.environ.get("GEMINI_API_KEY")
-        self.mock_mode = not bool(self.api_key)
+        if mock_mode is not None:
+            self.mock_mode = mock_mode
+        else:
+            self.mock_mode = not bool(self.api_key)
         
         if not self.mock_mode:
             self.client = genai.Client(api_key=self.api_key)
@@ -543,9 +546,20 @@ class GraphInvestigator:
         sec_str = f" (Secondary: {', '.join(secondary_intents)})" if secondary_intents else ""
         sections.append(f"### Investigation Summary\n**Query**: *\"{q}\"*\n**Classified Primary Intent**: `{intent}`{sec_str}")
         if entities:
-            ent_str = ", ".join(f"`{e['name']}` ({e['type']} in `{e['source_path']}`)" for e in entities)
-            sections.append(f"**Resolved Entities**: {ent_str}")
-            for e in entities:
+            if len(entities) <= 5:
+                ent_str = ", ".join(f"`{e['name']}` ({e['type']} in `{e['source_path']}`)" for e in entities)
+                sections.append(f"**Resolved Entities ({len(entities)})**: {ent_str}")
+            else:
+                top_ents = entities[:5]
+                top_str = ", ".join(f"`{e['name']}` ({e['type']} in `{e['source_path']}`)" for e in top_ents)
+                remaining_count = len(entities) - 5
+                details_lines = ["\n<details>", f"<summary>View all {len(entities)} resolved entities ({remaining_count} additional)</summary>\n"]
+                for e in entities:
+                    details_lines.append(f"- `{e['name']}` ({e['type']} in `{e['source_path']}`, confidence: {e.get('confidence', 1.0)})")
+                details_lines.append("</details>")
+                sections.append(f"**Resolved Entities ({len(entities)})**: {top_str} ... and {remaining_count} more\n" + "\n".join(details_lines))
+
+            for e in entities[:5]:
                 if e.get("is_ambiguous"):
                     sections.append(f"> [!WARNING]\n> **Entity Ambiguity Detected**: Candidate '{e['name']}' has near-identical confidence to {e.get('ambiguous_candidates')}. Clarification recommended.")
 

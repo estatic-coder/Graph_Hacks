@@ -10,6 +10,15 @@ from app.agent.control_flow import ControlFlowAnalyzer
 
 logger = logging.getLogger(__name__)
 
+
+def _safe_row_get(row, index: int, default=None):
+    """Safely retrieve a value from a result row by index, returning default if out of bounds."""
+    try:
+        return row[index]
+    except (IndexError, TypeError):
+        return default
+
+
 @dataclass
 class HunkChange:
     old_start: int
@@ -382,12 +391,23 @@ class ImpactAnalyzer:
                 file_has_symbol_overlap = False
 
                 for r in rows:
-                    s_id = str(r[0])
-                    s_type = str(r[1])
-                    s_name = str(r[2])
-                    s_path = str(r[3])
-                    s_start = int(r[4]) if r[4] is not None else 1
-                    s_end = int(r[5]) if r[5] is not None else 1
+                    s_id = _safe_row_get(r, 0)
+                    s_type = _safe_row_get(r, 1)
+                    s_name = _safe_row_get(r, 2)
+                    s_path = _safe_row_get(r, 3)
+                    _s_start_raw = _safe_row_get(r, 4)
+                    _s_end_raw = _safe_row_get(r, 5)
+
+                    # Skip rows that don't have the minimum required fields
+                    if s_id is None or s_name is None:
+                        continue
+
+                    s_id = str(s_id)
+                    s_type = str(s_type) if s_type is not None else "Symbol"
+                    s_name = str(s_name)
+                    s_path = str(s_path) if s_path is not None else ""
+                    s_start = int(_s_start_raw) if _s_start_raw is not None else 1
+                    s_end = int(_s_end_raw) if _s_end_raw is not None else 1
 
                     # Check overlap with changed lines
                     overlaps = [l for l in fd.changed_lines if s_start <= l <= s_end]
@@ -443,7 +463,7 @@ class ImpactAnalyzer:
             WHERE target.id = $target_id
               AND (target.repository_id = $repo_id OR target.id STARTS WITH 'sym_' + $repo_id OR target.id STARTS WITH 'file_' + $repo_id)
               AND (dep.repository_id = $repo_id OR dep.id STARTS WITH 'sym_' + $repo_id OR dep.id STARTS WITH 'file_' + $repo_id)
-            RETURN dep.id, labels(dep)[0], dep.name, dep.source_path, length(p) AS depth,
+            RETURN dep.id, labels(dep)[0], dep.name, dep.source_path, coalesce(dep.start_line, 1), length(p) AS depth,
                    [node IN nodes(p) | coalesce(node.name, node.id)] AS path_names
             LIMIT 50
             """
@@ -453,16 +473,22 @@ class ImpactAnalyzer:
                 res = falkor_client.safe_query(self.graph_name, cypher, params)
                 rows = getattr(res, "result_set", res) or []
                 for r in rows:
-                    d_id = str(r[0])
+                    d_id = _safe_row_get(r, 0)
+                    if d_id is None:
+                        continue
+                    d_id = str(d_id)
                     # Avoid self-reference
                     if d_id == cs.id:
                         continue
-                    d_type = str(r[1])
-                    d_name = str(r[2])
-                    d_path = str(r[3]) if r[3] is not None else None
-                    depth = int(r[4])
-                    path_names = list(r[5]) if len(r) > 5 and r[5] else []
-                    path_str = " -> ".join(path_names)
+                    d_type = str(_safe_row_get(r, 1) or "Symbol")
+                    d_name = str(_safe_row_get(r, 2) or d_id)
+                    _d_path_raw = _safe_row_get(r, 3)
+                    d_path = str(_d_path_raw) if _d_path_raw is not None else None
+                    _depth_raw = _safe_row_get(r, 5)
+                    depth = int(_depth_raw) if _depth_raw is not None else 1
+                    _path_names_raw = _safe_row_get(r, 7) if len(r) > 7 and isinstance(_safe_row_get(r, 7), (list, tuple)) else _safe_row_get(r, 6)
+                    path_names = list(_path_names_raw) if isinstance(_path_names_raw, (list, tuple)) else []
+                    path_str = " -> ".join(str(p) for p in path_names)
 
                     key = f"{d_id}::{depth}"
                     if key not in seen_keys:
@@ -758,7 +784,7 @@ class ImpactAnalyzer:
 
             # Check failure simulation in test
             # Check exhaustion failure vs transient failure
-            is_persistent_failure = any(kw in test_body_text for kw in ["fail_always", "fails_always", "retry_exhaustion", "persistent"])
+            is_persistent_failure = any(kw in test_body_text for kw in ["fail_always", "fails_always", "retry_exhaustion", "persistent", "failures.add", "failures", "fail_forever"])
             is_transient_only = "fail_once" in test_body_text and not is_persistent_failure
 
             # Check if assertions verify post-exhaustion state restoration / cleanup (e.g. credits, reservation cleared)
@@ -772,18 +798,18 @@ class ImpactAnalyzer:
             if is_persistent_failure and has_exhaustion_assertion:
                 # Test triggers persistent exhaustion and asserts post-failure cleanup
                 regression_detecting_tests.append(f"{t_file}:{t_name}")
-                coverage_status_map[f"{t_file}:{t_name}"] = "REGRESSION_DETECTING"
+                coverage_status_map[f"{t_file}:{t_name}"] = "VERIFIED_COVERAGE"
             elif is_persistent_failure and not has_exhaustion_assertion:
                 # Executes the branch but does not assert state difference
                 behaviorally_affected_tests.append(f"{t_file}:{t_name}")
-                coverage_status_map[f"{t_file}:{t_name}"] = "BRANCH_EXECUTING_NON_DETECTING"
+                coverage_status_map[f"{t_file}:{t_name}"] = "PARTIAL_COVERAGE"
             elif reaches_execution:
                 # Executes the function on success or transient path, does not execute exhaustion cleanup
                 behaviorally_affected_tests.append(f"{t_file}:{t_name}")
-                coverage_status_map[f"{t_file}:{t_name}"] = "FUNCTION_EXECUTING_ONLY"
+                coverage_status_map[f"{t_file}:{t_name}"] = "PARTIAL_COVERAGE"
             else:
                 statically_reachable_tests.append(f"{t_file}:{t_name}")
-                coverage_status_map[f"{t_file}:{t_name}"] = "STATICALLY_REACHABLE_ONLY"
+                coverage_status_map[f"{t_file}:{t_name}"] = "STATICALLY_REACHABLE_TEST"
 
         # 3. Identify workflow coverage status across direct callers
         for dc in direct_callers:
@@ -925,12 +951,18 @@ class ImpactAnalyzer:
                         logger.error(f"Error reading caller source {caller.source_path}: {e}")
 
             for r in rows:
-                c_id = str(r[0])
-                c_type = str(r[1])
-                c_name = str(r[2])
-                c_path = str(r[3]) if r[3] is not None else None
-                c_start = int(r[4]) if r[4] is not None else None
-                c_end = int(r[5]) if r[5] is not None else None
+                c_id = _safe_row_get(r, 0)
+                if c_id is None:
+                    continue
+                c_id = str(c_id)
+                c_type = str(_safe_row_get(r, 1) or "Symbol")
+                c_name = str(_safe_row_get(r, 2) or c_id)
+                _c_path_raw = _safe_row_get(r, 3)
+                c_path = str(_c_path_raw) if _c_path_raw is not None else None
+                _c_start_raw = _safe_row_get(r, 4)
+                c_start = int(_c_start_raw) if _c_start_raw is not None else None
+                _c_end_raw = _safe_row_get(r, 5)
+                c_end = int(_c_end_raw) if _c_end_raw is not None else None
 
                 if c_id in seen or c_name in target_names:
                     continue
@@ -1016,13 +1048,13 @@ class ImpactAnalyzer:
         if rows:
             r = rows[0]
             cs = ChangedSymbol(
-                id=str(r[0]),
-                name=str(r[2]),
-                type=str(r[1]),
-                source_path=str(r[3]) if r[3] and str(r[3]) != "None" else "unknown",
-                start_line=int(r[4]) if r[4] is not None else 1,
-                end_line=int(r[5]) if r[5] is not None else 1,
-                overlapping_lines=[int(r[4])] if r[4] is not None else [1]
+                id=str(_safe_row_get(r, 0) or symbol_name_or_id),
+                name=str(_safe_row_get(r, 2) or _safe_row_get(r, 0) or symbol_name_or_id),
+                type=str(_safe_row_get(r, 1) or "Symbol"),
+                source_path=str(_safe_row_get(r, 3)) if _safe_row_get(r, 3) and str(_safe_row_get(r, 3)) != "None" else "unknown",
+                start_line=int(_safe_row_get(r, 4)) if _safe_row_get(r, 4) is not None else 1,
+                end_line=int(_safe_row_get(r, 5)) if _safe_row_get(r, 5) is not None else 1,
+                overlapping_lines=[int(_safe_row_get(r, 4))] if _safe_row_get(r, 4) is not None else [1]
             )
         else:
             # Fallback: scan repository AST on disk for definition

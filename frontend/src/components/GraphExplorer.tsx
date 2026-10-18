@@ -1,21 +1,30 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import cytoscape from 'cytoscape';
 import { Network, Loader2, GitMerge } from 'lucide-react';
+import { GraphToolbar, GraphLayoutType } from './GraphToolbar';
 
 interface GraphExplorerProps {
   repoId: string;
   onNodeSelect: (nodeData: any) => void;
   affectedNodeIds?: string[];
+  focusedNodeName?: string;
 }
 
-
-
-const GraphExplorer: React.FC<GraphExplorerProps> = ({ repoId, onNodeSelect, affectedNodeIds }) => {
+const GraphExplorer: React.FC<GraphExplorerProps> = ({
+  repoId,
+  onNodeSelect,
+  affectedNodeIds,
+  focusedNodeName
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const cyRef = useRef<cytoscape.Core | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [nodeCount, setNodeCount] = useState<number | null>(null);
   const [edgeCount, setEdgeCount] = useState<number | null>(null);
+  const [currentLayout, setCurrentLayout] = useState<GraphLayoutType>('cose');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [filterType, setFilterType] = useState<string>('ALL');
+
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -354,6 +363,71 @@ const GraphExplorer: React.FC<GraphExplorerProps> = ({ repoId, onNodeSelect, aff
     });
   }, [affectedNodeIds]);
 
+  /* ── Layout switching function ─────────────────────────────── */
+  const runLayout = useCallback((layoutName: GraphLayoutType) => {
+    if (!cyRef.current) return;
+    const layoutConfig: any = {
+      name: layoutName,
+      animate: true,
+      animationDuration: 400,
+      fit: true,
+      padding: 48,
+    };
+    if (layoutName === 'cose') {
+      layoutConfig.idealEdgeLength = () => 90;
+      layoutConfig.nodeRepulsion = () => 6000;
+      layoutConfig.gravity = 0.8;
+      layoutConfig.numIter = 1000;
+    } else if (layoutName === 'concentric') {
+      layoutConfig.concentric = (node: any) => {
+        const lbl = node.data('label');
+        if (lbl === 'Repository') return 4;
+        if (lbl === 'File') return 3;
+        if (lbl === 'Class') return 2;
+        return 1;
+      };
+      layoutConfig.levelWidth = () => 1;
+    } else if (layoutName === 'breadthfirst') {
+      layoutConfig.directed = true;
+      layoutConfig.spacingFactor = 1.2;
+    }
+    const layout = cyRef.current.layout(layoutConfig);
+    layout.run();
+  }, []);
+
+  /* ── Dynamic search & type filtering ──────────────────────── */
+  useEffect(() => {
+    if (!cyRef.current) return;
+    const q = searchQuery.trim().toLowerCase();
+    cyRef.current.batch(() => {
+      cyRef.current?.nodes().forEach(node => {
+        const d = node.data();
+        const matchesName = !q || (d.name && d.name.toLowerCase().includes(q));
+        const matchesType = filterType === 'ALL' || (d.label && d.label.toUpperCase() === filterType);
+        if (matchesName && matchesType) {
+          node.style('opacity', '1');
+        } else {
+          node.style('opacity', '0.15');
+        }
+      });
+    });
+  }, [searchQuery, filterType]);
+
+  /* ── Focus on node when requested ─────────────────────────── */
+  useEffect(() => {
+    if (!cyRef.current || !focusedNodeName) return;
+    const target = cyRef.current.nodes().filter(n => n.data('name') === focusedNodeName || n.data('id') === focusedNodeName);
+    if (target.length > 0) {
+      cyRef.current.animate({
+        center: { eles: target },
+        zoom: 1.4,
+        duration: 350
+      });
+      target.select();
+      onNodeSelect(target.data());
+    }
+  }, [focusedNodeName, onNodeSelect]);
+
   return (
     <div
       style={{
@@ -410,60 +484,24 @@ const GraphExplorer: React.FC<GraphExplorerProps> = ({ repoId, onNodeSelect, aff
         </div>
       </div>
 
-      {/* ── Fit / zoom control ──────────────────────────── */}
+      {/* ── Graph Toolbar ───────────────────────────────── */}
       {!isLoading && nodeCount !== null && nodeCount > 0 && (
-        <div className="absolute top-3 right-3 z-10 flex space-x-1">
-          <button
-            onClick={() => cyRef.current?.fit(undefined, 48)}
-            style={{
-              padding: '5px 10px',
-              fontSize: '10px',
-              fontFamily: 'JetBrains Mono, monospace',
-              color: '#475569',
-              background: 'rgba(0,0,0,0.75)',
-              border: '1px solid #1e2330',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              backdropFilter: 'blur(12px)',
-              transition: 'color 0.15s',
+        <div className="absolute top-3 right-3 z-10">
+          <GraphToolbar
+            currentLayout={currentLayout}
+            onChangeLayout={layout => {
+              setCurrentLayout(layout);
+              runLayout(layout);
             }}
-            onMouseEnter={e => ((e.target as HTMLElement).style.color = '#94a3b8')}
-            onMouseLeave={e => ((e.target as HTMLElement).style.color = '#475569')}
-          >
-            Fit
-          </button>
-          <button
-            onClick={() => cyRef.current?.zoom((cyRef.current.zoom() * 1.2))}
-            style={{
-              padding: '5px 8px',
-              fontSize: '12px',
-              color: '#475569',
-              background: 'rgba(0,0,0,0.75)',
-              border: '1px solid #1e2330',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              backdropFilter: 'blur(12px)',
-              transition: 'color 0.15s',
-            }}
-            onMouseEnter={e => ((e.target as HTMLElement).style.color = '#94a3b8')}
-            onMouseLeave={e => ((e.target as HTMLElement).style.color = '#475569')}
-          >+</button>
-          <button
-            onClick={() => cyRef.current?.zoom((cyRef.current.zoom() * 0.8))}
-            style={{
-              padding: '5px 8px',
-              fontSize: '12px',
-              color: '#475569',
-              background: 'rgba(0,0,0,0.75)',
-              border: '1px solid #1e2330',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              backdropFilter: 'blur(12px)',
-              transition: 'color 0.15s',
-            }}
-            onMouseEnter={e => ((e.target as HTMLElement).style.color = '#94a3b8')}
-            onMouseLeave={e => ((e.target as HTMLElement).style.color = '#475569')}
-          >−</button>
+            onFit={() => cyRef.current?.fit(undefined, 48)}
+            onZoomIn={() => cyRef.current && cyRef.current.zoom(cyRef.current.zoom() * 1.2)}
+            onZoomOut={() => cyRef.current && cyRef.current.zoom(cyRef.current.zoom() * 0.8)}
+            onRelayout={() => runLayout(currentLayout)}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            selectedFilter={filterType}
+            onFilterChange={setFilterType}
+          />
         </div>
       )}
 

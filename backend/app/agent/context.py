@@ -62,19 +62,9 @@ class InvestigationContext:
         if not path:
             return False
         clean = path.replace("\\", "/")
-        alien_markers = {
-            "orbitflow": "repo_orbitflow",
-            "nexuspay": "repo_nexuspay",
-            "aegisops": "repo_aegisops",
-            "sentinelshop": "repo_sentinelshop",
-            "relaymesh": "repo_relaymesh",
-            "signalforge": "repo_signalforge",
-            "orbitops": "repo_orbitops",
-            "deployweave": "repo_deployweave",
-        }
         active_lower = self.repository_id.lower()
-        for marker, expected_repo in alien_markers.items():
-            if marker in clean.lower() and expected_repo not in active_lower:
+        for marker in ("orbitflow", "nexuspay", "aegisops", "sentinelshop", "relaymesh", "signalforge", "orbitops", "deployweave"):
+            if marker in clean.lower() and marker not in active_lower:
                 return True
         return False
 

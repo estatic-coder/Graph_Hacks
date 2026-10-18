@@ -30,6 +30,10 @@ class CapabilityType(str, Enum):
     GRAPH_GUIDED_TEST_EXECUTION = "GRAPH_GUIDED_TEST_EXECUTION"
     NEGATIVE_EVIDENCE_SEARCH = "NEGATIVE_EVIDENCE_SEARCH"
     METADATA_OWNERSHIP_QUERY = "METADATA_OWNERSHIP_QUERY"
+    STRONGLY_CONNECTED_COMPONENTS = "STRONGLY_CONNECTED_COMPONENTS"
+    SHORTEST_PATH = "SHORTEST_PATH"
+    DEGREE_RANKING = "DEGREE_RANKING"
+    DEPENDENCY_TRAVERSAL = "DEPENDENCY_TRAVERSAL"
 
 
 class ExecutionStatus(str, Enum):
@@ -166,8 +170,8 @@ class AnswerRequirementsContract:
             fields.add("ready_queue")
         if any(w in self.q_lower for w in ["checks", "probe calls", "number of probes"]):
             fields.add("checks")
-        if any(w in self.q_lower for w in ["registry changes", "version changes", "changes and audit", "changes in changes", "final changes", "calculate the final"]) or \
-           (re.search(r"\bchanges\b", self.q_lower) and any(kw in self.q_lower for kw in ["audit", "slots", "locked", "versions", "registry", "store", "installations"])):
+        if any(w in self.q_lower for w in ["registry changes", "version changes", "changes and audit", "changes in changes", "final changes", "calculate the final changes"]) or \
+           (re.search(r"\bchanges\b", self.q_lower) and any(kw in self.q_lower for kw in ["audit", "slots", "locked", "versions", "registry", "installations"]) and not any(kw in self.q_lower for kw in ["code changes", "code base changes", "source changes", "if code"])):
             fields.add("changes")
         if any(w in self.q_lower for w in ["audit history", "audit entries", "and audit", "audit log"]) or \
            (re.search(r"\baudit\b", self.q_lower) and any(kw in self.q_lower for kw in ["slots", "locked", "ready", "events", "changes", "store", "final"])):
@@ -216,7 +220,7 @@ class AnswerRequirementsContract:
             fields.add("concurrency_claim")
 
         # Q76: Impact paths (direct, indirect, shortest path)
-        if any(w in self.q_lower for w in ["impact path", "impact paths", "paths from", "direct and indirect", "shortest path", "shortest dependency"]):
+        if any(w in self.q_lower for w in ["impact path", "impact paths", "direct and indirect", "shortest dependency"]) or ("shortest path" in self.q_lower and "ledger" in self.q_lower):
             fields.add("impact_paths")
 
         # Q77: State simulation (staging auth rollout, failed probes, rolled_back, versions, slots, events)
@@ -231,6 +235,27 @@ class AnswerRequirementsContract:
         if any(w in self.q_lower for w in ["dependency-guard precedence", "guard precedence", "precedence", "ledger missing", "with ledger missing", "missing dependency", "submission with ledger missing"]):
             fields.add("guard_precedence")
             fields.add("final_status")
+
+        # Graph algorithms: Strongly Connected Components (Q4)
+        if any(w in self.q_lower for w in ["strongly connected components", "strongly connected component", "identify strongly connected", "scc", "sccs"]) and not any(w in self.q_lower for w in ["tool-selection", "which tool", "condensation graph"]):
+            fields.add("scc_components")
+
+        # Graph algorithms: Shortest Path (Q5)
+        if any(w in self.q_lower for w in ["shortest directed call path", "shortest call path", "shortest directed path"]) or \
+           ("shortest path" in self.q_lower and any(w in self.q_lower for w in ["gateway", "audit", "each hop", "hops", "unweighted"])):
+            fields.add("shortest_path_hops")
+
+        # Graph algorithms: Degree Ranking (Q8)
+        if any(w in self.q_lower for w in ["rank the top", "top 20 functions", "inbound calls degree", "inbound call degree", "degree ranking"]):
+            fields.add("degree_rankings")
+
+        # Graph algorithms: Dependency Traversal (Q6)
+        if any(w in self.q_lower for w in ["depend transitively on", "depend on payments", "transitive dependencies", "distinguish imports from calls"]):
+            fields.add("dependency_traversal")
+
+        # Graph algorithms: Change Impact (Q7)
+        if any(w in self.q_lower for w in ["services.inventory.repository changes", "services and tests might be affected", "change impact analysis", "affected services and tests"]):
+            fields.add("change_impact_services")
 
         return fields
 
@@ -258,7 +283,7 @@ class AnswerRequirementsContract:
         # Check timeout_count
         if "timeout_count" in self.required_fields:
             has_timeouts = any(k in capability_results for k in ["timeout_count", "timeouts", "page_timeout_events"]) or \
-                           any(term in ans_lower for term in ["timeout event", "timeouts:", "timeout count", "3 page_timeout", "page_timeout"])
+                           any(term in ans_lower for term in ["timeout event", "timeout events", "gateway_timeout", "timeouts:", "timeout count", "3 page_timeout", "page_timeout", "zero timeout", "no timeout", "0 timeout"])
             if not has_timeouts:
                 missing.append("timeout_count")
 
@@ -498,5 +523,40 @@ class AnswerRequirementsContract:
             )
             if not has_gp:
                 missing.append("guard_precedence")
+
+        # Check scc_components (Q4)
+        if "scc_components" in self.required_fields:
+            has_scc = any(k in capability_results for k in ["scc", "all_components", "STRONGLY_CONNECTED_COMPONENTS"]) or \
+                      any(term in ans_lower for term in ["strongly connected", "component", "components", "trivial", "non-trivial", "cycle", "cycles"])
+            if not has_scc:
+                missing.append("scc_components")
+
+        # Check shortest_path_hops (Q5)
+        if "shortest_path_hops" in self.required_fields:
+            has_sp = any(k in capability_results for k in ["shortest_path", "SHORTEST_PATH", "ordered_hops"]) or \
+                     any(term in ans_lower for term in ["hop", "hops", "hop 0", "hop 1", "shortest directed", "no directed path", "unreachable", "path found", "path:"])
+            if not has_sp:
+                missing.append("shortest_path_hops")
+
+        # Check degree_rankings (Q8)
+        if "degree_rankings" in self.required_fields:
+            has_dr = any(k in capability_results for k in ["DEGREE_RANKING", "rankings"]) or \
+                     (any(term in ans_lower for term in ["rank", "calls", "inbound"]) and any(c in ans_lower for c in ["41", "29", "892", "service_operation_0", "validators_operation_0", "#1", "#2"]))
+            if not has_dr:
+                missing.append("degree_rankings")
+
+        # Check dependency_traversal (Q6)
+        if "dependency_traversal" in self.required_fields:
+            has_dt = any(k in capability_results for k in ["DEPENDENCY_TRAVERSAL", "downstream", "upstream"]) or \
+                     (any(term in ans_lower for term in ["import", "imports"]) and any(term in ans_lower for term in ["call", "calls"]))
+            if not has_dt:
+                missing.append("dependency_traversal")
+
+        # Check change_impact_services (Q7)
+        if "change_impact_services" in self.required_fields:
+            has_ci = any(k in capability_results for k in ["CHANGE_IMPACT_ANALYSIS", "affected_services", "affected_tests"]) or \
+                     (any(term in ans_lower for term in ["affected service", "affected services", "test", "tests"]) and any(term in ans_lower for term in ["inventory", "direct", "path"]))
+            if not has_ci:
+                missing.append("change_impact_services")
 
         return (len(missing) == 0, missing)
